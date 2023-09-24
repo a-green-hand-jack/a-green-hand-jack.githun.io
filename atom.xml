@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>蒟蒻薯USTCer</title>
+  
+  <subtitle>Jack Wu</subtitle>
+  <link href="https://a-green-hand-jack.github.io/blog/atom.xml" rel="self"/>
+  
+  <link href="https://a-green-hand-jack.github.io/blog/"/>
+  <updated>2023-09-21T13:59:03.416Z</updated>
+  <id>https://a-green-hand-jack.github.io/blog/</id>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Transformer学习记录</title>
+    <link href="https://a-green-hand-jack.github.io/blog/2023/09/21/Transformer%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/"/>
+    <id>https://a-green-hand-jack.github.io/blog/2023/09/21/Transformer%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/</id>
+    <published>2023-09-21T02:02:36.000Z</published>
+    <updated>2023-09-21T13:59:03.416Z</updated>
+    
+    
+    <summary type="html">在CS231n(2019)中,有一部分关于RNN的内容&lt;现在已经去除&gt;,我学的时候查阅其他资料,发现RNN能干的事情transformer似乎也能干而且更好.所以我干脆没有管 RNN那一部分的任务,而是花了一些时间仔细的学习了transformer,这里是我的学习记录</summary>
+    
+    
+    
+    <category term="机器学习" scheme="https://a-green-hand-jack.github.io/blog/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="CS231n-深度学习与计算机视觉-RNN" scheme="https://a-green-hand-jack.github.io/blog/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/CS231n-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89-RNN/"/>
+    
+    
+    <category term="Machine Learning" scheme="https://a-green-hand-jack.github.io/blog/tags/Machine-Learning/"/>
+    
+    <category term="Transformer" scheme="https://a-green-hand-jack.github.io/blog/tags/Transformer/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>免疫生物学-一周目</title>
+    <link href="https://a-green-hand-jack.github.io/blog/2023/09/20/%E5%85%8D%E7%96%AB%E7%94%9F%E7%89%A9%E5%AD%A6-%E4%B8%80%E5%91%A8%E7%9B%AE/"/>
+    <id>https://a-green-hand-jack.github.io/blog/2023/09/20/%E5%85%8D%E7%96%AB%E7%94%9F%E7%89%A9%E5%AD%A6-%E4%B8%80%E5%91%A8%E7%9B%AE/</id>
+    <published>2023-09-19T16:56:00.926Z</published>
+    <updated>2023-09-15T12:45:07.650Z</updated>
+    
+    
+    <summary type="html">最近摆烂实在是太严重了,一天天的,任何事情都没有什么好的进展,为了督促自己好好学习,决定上一次课写一次博客,也就是作为笔记了,希望这样可以督促自己</summary>
+    
+    
+    
+    <category term="生物" scheme="https://a-green-hand-jack.github.io/blog/categories/%E7%94%9F%E7%89%A9/"/>
+    
+    <category term="免疫生物学" scheme="https://a-green-hand-jack.github.io/blog/categories/%E7%94%9F%E7%89%A9/%E5%85%8D%E7%96%AB%E7%94%9F%E7%89%A9%E5%AD%A6/"/>
+    
+    
+    <category term="免疫生物学" scheme="https://a-green-hand-jack.github.io/blog/tags/%E5%85%8D%E7%96%AB%E7%94%9F%E7%89%A9%E5%AD%A6/"/>
+    
+    <category term="淋巴" scheme="https://a-green-hand-jack.github.io/blog/tags/%E6%B7%8B%E5%B7%B4/"/>
+    
+    <category term="免疫反应" scheme="https://a-green-hand-jack.github.io/blog/tags/%E5%85%8D%E7%96%AB%E5%8F%8D%E5%BA%94/"/>
+    
+    <category term="病原体" scheme="https://a-green-hand-jack.github.io/blog/tags/%E7%97%85%E5%8E%9F%E4%BD%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>关于butterfly主题的相关说明</title>
+    <link href="https://a-green-hand-jack.github.io/blog/2023/09/04/%E5%85%B3%E4%BA%8Ebutterfly%E4%B8%BB%E9%A2%98%E7%9A%84%E7%9B%B8%E5%85%B3%E8%AF%B4%E6%98%8E/"/>
+    <id>https://a-green-hand-jack.github.io/blog/2023/09/04/%E5%85%B3%E4%BA%8Ebutterfly%E4%B8%BB%E9%A2%98%E7%9A%84%E7%9B%B8%E5%85%B3%E8%AF%B4%E6%98%8E/</id>
+    <published>2023-09-04T06:58:34.000Z</published>
+    <updated>2023-09-04T09:15:45.900Z</updated>
+    
+    
+    <summary type="html">在入坑Hexo不久之后,我选择了经典的ButterFly主题作为模板书写自己的博客,官方网站说明详细.但是很多东西在我第一遍设置之后就几乎不会在做任何修改,所以我在这里记录我觉得有必要的那些内容.</summary>
+    
+    
+    
+    <category term="雕虫小技" scheme="https://a-green-hand-jack.github.io/blog/categories/%E9%9B%95%E8%99%AB%E5%B0%8F%E6%8A%80/"/>
+    
+    <category term="博客制作" scheme="https://a-green-hand-jack.github.io/blog/categories/%E9%9B%95%E8%99%AB%E5%B0%8F%E6%8A%80/%E5%8D%9A%E5%AE%A2%E5%88%B6%E4%BD%9C/"/>
+    
+    
+    <category term="Hexo" scheme="https://a-green-hand-jack.github.io/blog/tags/Hexo/"/>
+    
+    <category term="Butterfly" scheme="https://a-green-hand-jack.github.io/blog/tags/Butterfly/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>利用git实现本地文件和远程仓库的同步</title>
+    <link href="https://a-green-hand-jack.github.io/blog/2023/08/28/%E5%88%A9%E7%94%A8git%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E5%92%8C%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E7%9A%84%E5%90%8C%E6%AD%A5/"/>
+    <id>https://a-green-hand-jack.github.io/blog/2023/08/28/%E5%88%A9%E7%94%A8git%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E5%92%8C%E8%BF%9C%E7%A8%8B%E4%BB%93%E5%BA%93%E7%9A%84%E5%90%8C%E6%AD%A5/</id>
+    <published>2023-08-27T23:10:12.000Z</published>
+    <updated>2023-08-29T01:11:10.599Z</updated>
+    
+    
+    <summary type="html">之前我一直不愿意使用git来同步本地文件和远程仓库,觉得有点麻烦.但是最近遇到了不得不使用的情况,折腾了一晚上才搞定,所以写一个帖子记录一下,也是方便以后查看使用.</summary>
+    
+    
+    
+    <category term="雕虫小技" scheme="https://a-green-hand-jack.github.io/blog/categories/%E9%9B%95%E8%99%AB%E5%B0%8F%E6%8A%80/"/>
+    
+    <category term="Git" scheme="https://a-green-hand-jack.github.io/blog/categories/%E9%9B%95%E8%99%AB%E5%B0%8F%E6%8A%80/Git/"/>
+    
+    
+    <category term="Git" scheme="https://a-green-hand-jack.github.io/blog/tags/Git/"/>
+    
+    <category term="Github" scheme="https://a-green-hand-jack.github.io/blog/tags/Github/"/>
+    
+    <category term="SSH" scheme="https://a-green-hand-jack.github.io/blog/tags/SSH/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>如何使用Hexo和Github搭建个人博客</title>
+    <link href="https://a-green-hand-jack.github.io/blog/2023/08/25/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Hexo%E5%92%8CGithub%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2-md/"/>
+    <id>https://a-green-hand-jack.github.io/blog/2023/08/25/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Hexo%E5%92%8CGithub%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2-md/</id>
+    <published>2023-08-24T17:40:33.000Z</published>
+    <updated>2023-09-19T17:16:47.002Z</updated>
+    
+    
+    <summary type="html">Hexo是一款基于Node.js的静态博客框架，可以方便的生成静态网页交由Github等托管。中科大以前为每个学生配置[服务器域名](http://home.ustc.edu.cn),但是这个系统于2022年7月之后的新用户不再开通,所以这里采用github.io作为案例,有条件的同学也可以自行购买域名.</summary>
+    
+    
+    
+    <category term="雕虫小技" scheme="https://a-green-hand-jack.github.io/blog/categories/%E9%9B%95%E8%99%AB%E5%B0%8F%E6%8A%80/"/>
+    
+    <category term="博客制作" scheme="https://a-green-hand-jack.github.io/blog/categories/%E9%9B%95%E8%99%AB%E5%B0%8F%E6%8A%80/%E5%8D%9A%E5%AE%A2%E5%88%B6%E4%BD%9C/"/>
+    
+    
+    <category term="Hexo" scheme="https://a-green-hand-jack.github.io/blog/tags/Hexo/"/>
+    
+    <category term="Github" scheme="https://a-green-hand-jack.github.io/blog/tags/Github/"/>
+    
+    <category term="SSH" scheme="https://a-green-hand-jack.github.io/blog/tags/SSH/"/>
+    
+  </entry>
+  
+</feed>
