@@ -6,10 +6,23 @@
   <link href="https://a-green-hand-jack.github.io/blog/atom.xml" rel="self"/>
   
   <link href="https://a-green-hand-jack.github.io/blog/"/>
-  <updated>2023-09-21T13:59:03.416Z</updated>
+  <updated>2024-05-22T05:49:46.581Z</updated>
   <id>https://a-green-hand-jack.github.io/blog/</id>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>扩散模型入门</title>
+    <link href="https://a-green-hand-jack.github.io/blog/2024/05/22/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8/"/>
+    <id>https://a-green-hand-jack.github.io/blog/2024/05/22/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8/</id>
+    <published>2024-05-22T05:49:46.000Z</published>
+    <updated>2024-05-22T05:49:46.581Z</updated>
+    
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>Transformer学习记录</title>
@@ -114,7 +127,7 @@
     <link href="https://a-green-hand-jack.github.io/blog/2023/08/25/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Hexo%E5%92%8CGithub%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2-md/"/>
     <id>https://a-green-hand-jack.github.io/blog/2023/08/25/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Hexo%E5%92%8CGithub%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2-md/</id>
     <published>2023-08-24T17:40:33.000Z</published>
-    <updated>2023-09-19T17:16:47.002Z</updated>
+    <updated>2024-05-22T05:50:40.031Z</updated>
     
     
     <summary type="html">Hexo是一款基于Node.js的静态博客框架，可以方便的生成静态网页交由Github等托管。中科大以前为每个学生配置[服务器域名](http://home.ustc.edu.cn),但是这个系统于2022年7月之后的新用户不再开通,所以这里采用github.io作为案例,有条件的同学也可以自行购买域名.</summary>

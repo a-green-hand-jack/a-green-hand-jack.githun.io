@@ -473,7 +473,6 @@ $$</p>
     <url>/blog/2023/08/25/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Hexo%E5%92%8CGithub%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2-md/</url>
     <content><![CDATA[<h2 id="环境配置">环境配置</h2>
 <h3 id="注意事项">注意事项</h3>
-<p>$ a=b+1+\sqrt{2}$</p>
 <ol>
 <li>输入代码时候,切换为英文输入法</li>
 <li>文中的<strong>用户名</strong>和<strong>邮箱</strong>替换为自己的GitHub的<strong>账户名</strong>和绑定的<strong>邮箱</strong></li>
@@ -572,5 +571,10 @@ $$</p>
         <tag>Github</tag>
         <tag>SSH</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>扩散模型入门</title>
+    <url>/blog/2024/05/22/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8/</url>
+    <content><![CDATA[]]></content>
   </entry>
 </search>
