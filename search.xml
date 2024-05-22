@@ -577,4 +577,1081 @@ $$</p>
     <url>/blog/2024/05/22/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E5%85%A5%E9%97%A8/</url>
     <content><![CDATA[]]></content>
   </entry>
+  <entry>
+    <title>LLM与BioSequence</title>
+    <url>/blog/2024/05/22/LLM%E4%B8%8EBioSequence/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>随着各种测序技术的发展，伴随着全球各地的研究人员的头发的牺牲，人类的知识库中多出了很多有关基因组、转录组、蛋白组的数据。但是如何合理的运用这些来之不易的数据却成了一个大问题，在过去的很长一段时间中，生物信息学的进步弥补这其中的缺陷。然而，这些方法往往涉及到一个问题“不够通用”，也就说，某一种方法只能在一类任务或数据集上使用。同时，注意力机制在自然语言生成（natural language genertaion）上的成功引发了人们的关注：能不能像处理自然语言一样处理序列信息？</p>
+<p>在这样的想法的驱动下以及产生了很多优秀的工作，这里，笔者关注了<code>Geneformer</code>、<code>GenePT</code>、<code>scGPT</code>这3项工作。并在这里总结它们设计的用于评估模型表现力的下游任务以及这些任务对应的指标。</p>
+<h1 id="GenePT"><a href="#GenePT" class="headerlink" title="GenePT"></a>GenePT</h1><!-- 整体上是在基因和细胞两个水平考察了模型嵌入是否反应了真实的生物学意义，并且力求在保留生物学意义的同时减小批次和组织特异性；在这样的思路的指导下根据合适的数据集设计了相关的下游任务。 -->
+<p>使用 GPT-3.5 的单个基因的 NCBI 文本描述来生成基因嵌入；通过两种方式生成单细胞嵌入：（i）通过对基因嵌入进行平均，并根据每个基因的表达水平进行加权；（ii）通过使用按表达水平排序的基因名称为每个细胞创建一个句子嵌入；随后利用这些嵌入执行下游任务（如对基因属性和细胞类型的分类）。 GenePT 证明基于文献的大语言模型嵌入是获得生物基础模型的简单而有效的途径。</p>
+<h2 id="两种水平的任务"><a href="#两种水平的任务" class="headerlink" title="两种水平的任务"></a>两种水平的任务</h2><h3 id="基因水平的任务"><a href="#基因水平的任务" class="headerlink" title="基因水平的任务"></a>基因水平的任务</h3><ol>
+<li>基因功能类别预测：这是一个多分类预测跳转基于15个最常见的功能基因类别。这些类别的标签是作为<code>Geneformer</code>这个文章的一部分策划的。</li>
+<li>基因属性预测任务：这包括4个二元分类任务，这些任务基于Theodoeis 等人提供的开源数据：<ol>
+<li>区分先前确定的<em>剂量敏感转录因子</em>和 <em>剂量不敏感转录因子</em></li>
+<li>区分二价基因和非甲基化基因</li>
+<li>区分仅Lsy4甲基化和非甲基化基因</li>
+<li>区分长程转录因子和短程转录因子</li>
+</ol>
+</li>
+<li>基因-基因相关作用预测：理由Du等人开发并共享的基因-基因相互作用（GGI）基准。训练和测试数据集包括了200000对样本<code>（gene1,gene2,label）</code>，这里的<code>label</code>标记这一对基因是不是相互作用</li>
+<li>蛋白质-蛋白质<code>（PPI）</code>相关作用：<ol>
+<li>使用了3个数据集<ol>
+<li><code>The human binary protein interactions (HuRI) dataset</code></li>
+<li><code>comprehensive binary protein-protein interactions (Lit-BM)</code></li>
+<li><code>tissue-specific protein-protein functional interaction networks</code></li>
+</ol>
+</li>
+<li>这些数据集的基本形式是<code>(protein1, protein2, binary label)</code></li>
+<li>这里的二元标签表明两个蛋白质之间是否存在相互作用</li>
+<li>首先使用UniProt 转化工具把蛋白质的蛋白质组标志转化为基因名称；如果返回了多个基因名称，就随机选择一个</li>
+</ol>
+</li>
+<li>基因程序的无监督探索<ol>
+<li>检查基因之间的相互作用，使用来自<em>人类免疫组织数据集</em>的<code>GenePt</code>嵌入构建了一个基因-基因相互作用的相似性网络</li>
+<li>基于高变基因之间的余弦相似度构建基因网络</li>
+<li>应用Louvain 聚类来推到基因程序</li>
+</ol>
+</li>
+<li>定性的比较<em>突出的基因程序的趋势</em>与它们<em>对应的细胞特异性表达水平</em> </li>
+</ol>
+<h3 id="细胞水平的任务"><a href="#细胞水平的任务" class="headerlink" title="细胞水平的任务"></a>细胞水平的任务</h3><ol>
+<li><p>评估嵌入和底层细胞状态之间的关联：</p>
+<ol>
+<li>主动脉：包括11种细胞类型，最初由Li等人研究并发表的一个随机20%的数据子集</li>
+<li>动脉：包含10种细胞类型</li>
+<li>骨组织：<ol>
+<li>骨骼：包含7种细胞类型</li>
+<li>骨髓：包含3种已注释的癌症类型和11种细胞类型，总共13,468个细胞</li>
+</ol>
+</li>
+<li>胰腺：包含4,218个细胞中注释的11种细胞类型</li>
+<li><p>免疫细胞：从健康个体和多发性硬化症患者中收集，总共3,430个细胞中注释了18种细胞类型，来自12个供体。</p>
+<ol>
+<li><p>对于每个数据集及其关联的元数据注释，在预训练的 GenePT、Geneformer 或 scGPT 嵌入上应用 k 均值聚类，以获得与元数据注释中的类匹配的集群。</p>
+</li>
+<li><p>选择簇的数量 k 以匹配元数据注释中的类数量。</p>
+<ol>
+<li>计算<strong>调整兰德指数 (ARI) 和调整互信息 (AMI)</strong>，以评估派生簇标签与真实元数据标签之间的一致性。</li>
+<li>推断标签和实际标签之间的较高对齐度（由<em>较高</em>的 ARI 或 AMI 值表示）表明嵌入捕获了更多的生物结构和信号。</li>
+</ol>
+</li>
+<li><p>使用原始样本的真实注释计算了<strong>平均轮廓宽度（ASW）</strong>，以评估簇的凝聚力和分离度。</p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>上下文感知和批量集成：<ol>
+<li>评估 GenePT-s 嵌入是否受到常见批次效应的影响</li>
+<li>Aorta 数据集</li>
+<li>肌细胞数据集</li>
+</ol>
+</li>
+</ol>
+<h2 id="不同任务的结果"><a href="#不同任务的结果" class="headerlink" title="不同任务的结果"></a>不同任务的结果</h2><blockquote>
+<p>说明结果的时候似乎不可避免的会提到指标，所以干脆在这里就一起说了吧。。。</p>
+</blockquote>
+<h3 id="基因功能类别判断"><a href="#基因功能类别判断" class="headerlink" title="基因功能类别判断"></a>基因功能类别判断</h3><ol>
+<li><p>二维 UMAP 对GenePT 嵌入</p>
+<ol>
+<li><p>34000个基因</p>
+</li>
+<li><p>15个分类</p>
+</li>
+</ol>
+</li>
+</ol>
+<p><img src="UMAP.png" alt="UMAP"></p>
+<ol>
+<li><p>$l<em>2$ 正则化逻辑回归 ($l</em>{2}$ regularized logistic refression)</p>
+<ol>
+<li><p>训练集和测试集分配是7：3</p>
+</li>
+<li><p>有15类不同的基因</p>
+</li>
+<li><p><code>class-specific accuracies</code></p>
+</li>
+</ol>
+</li>
+</ol>
+<p><img src="class-specific-accuracies.png" alt="class-specific accuracies"></p>
+<blockquote>
+<p>也就是一个混淆矩阵</p>
+</blockquote>
+<h3 id="基因-基因相互作用预测"><a href="#基因-基因相互作用预测" class="headerlink" title="基因-基因相互作用预测"></a>基因-基因相互作用预测</h3><ol>
+<li><p>比较了3种方法在<strong>GGI</strong>数据集上的<strong>ROC-AUC</strong></p>
+<ol>
+<li><p>GenePT</p>
+</li>
+<li><p>Gene2Vec</p>
+</li>
+<li><p>Geneformer</p>
+</li>
+<li><p>scGPT</p>
+</li>
+<li><p>Permuted</p>
+</li>
+</ol>
+</li>
+<li><p>使用了$l_2-regularized logistic classifier$ 也就是 LR分类器</p>
+</li>
+</ol>
+<p><img src="gene-gene-inter.png" alt="gene-gene-inter"></p>
+<h3 id="蛋白-蛋白相互作用预测"><a href="#蛋白-蛋白相互作用预测" class="headerlink" title="蛋白-蛋白相互作用预测"></a>蛋白-蛋白相互作用预测</h3><ol>
+<li>指标是ROC-AUC</li>
+<li>3种不同的模型<ol>
+<li>GenePT</li>
+<li>scGPT</li>
+<li>geneformer</li>
+</ol>
+</li>
+<li>3个数据集<ol>
+<li>HuRI</li>
+<li>L-it-BM</li>
+<li>heart tissue</li>
+</ol>
+</li>
+</ol>
+<h3 id="细胞类型特异性激活"><a href="#细胞类型特异性激活" class="headerlink" title="细胞类型特异性激活"></a>细胞类型特异性激活</h3><ol>
+<li>通过“零样本”方法研究了人类免疫组织数据集中 GenePT 衍生基因程序中的细胞类型特异性激活</li>
+<li>根据GenePT embeddings之间的余弦相似度构建了相似度图</li>
+<li>如果两个基因相似度大于0.9就用一个边把两个基因连接起来</li>
+<li>使用20的分辨率对结果图进行Leiden 聚类</li>
+</ol>
+<p><img src="细胞类型特异性激活.png" alt="细胞类型特异性激活"></p>
+<h3 id="GenePT-嵌入预测染色质动力学和剂量敏感性"><a href="#GenePT-嵌入预测染色质动力学和剂量敏感性" class="headerlink" title="GenePT 嵌入预测染色质动力学和剂量敏感性"></a>GenePT 嵌入预测染色质动力学和剂量敏感性</h3><ol>
+<li>预测基因在网络动态中的作：<ol>
+<li>剂量敏感与剂量不敏感的转录因子</li>
+<li>二价基因与非甲基化基因</li>
+<li>仅 Lys4 甲基化与非甲基化基因</li>
+<li>长程转录因子与短程转录因子。</li>
+</ol>
+</li>
+<li>使用 scikit-learn<ol>
+<li>参数选择默认参数</li>
+<li>五倍交叉验证的 ROC-AUC </li>
+<li>l2 惩罚逻辑回归 (LR) 或随机森林 (RF) 分类器来评估 GenePT 和 Gene2vec 嵌入的性能</li>
+</ol>
+</li>
+</ol>
+<p><img src="嵌入预测染色质动力学和剂量敏感性.png" alt="嵌入预测染色质动力学和剂量敏感性"></p>
+<h3 id="GenePT-学习了细胞生的生物学表征"><a href="#GenePT-学习了细胞生的生物学表征" class="headerlink" title="GenePT 学习了细胞生的生物学表征"></a>GenePT 学习了细胞生的生物学表征</h3><p>评估不同潜在细胞表示（通过llm嵌入得到）和生物注释（人类手工标记）之间的关联：</p>
+<ol>
+<li><p>该分析涉及代表来自循环系统（主动脉和动脉）、骨组织（骨骼、骨髓）、胰腺的细胞以及从健康个体和多发性硬化症患者收集的免疫细胞的数据集。</p>
+</li>
+<li><p>使用预训练的 Geneformer 和 scGPT 嵌入来完成此任务。</p>
+</li>
+<li><p>计算调整兰德指数 (ARI) 和调整互信息 (AMI)，</p>
+<ol>
+<li><p>以将 <strong>k 均值聚类得出的标签与原始样本的真实注释进行比较</strong>（值越高表示对齐效果越好）；</p>
+</li>
+<li><p>使用原始样本的真实注释计算<strong>平均轮廓宽度（ASW）</strong>，以评估簇的凝聚力和分离度。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="GenePT-嵌入消除了批次效应"><a href="#GenePT-嵌入消除了批次效应" class="headerlink" title="GenePT 嵌入消除了批次效应"></a>GenePT 嵌入消除了批次效应</h3><p>评估 GenePT 嵌入对于批次相关的技术工件（例如患者变异性）是否稳健。</p>
+<ol>
+<li><p>使用 Chaffin 等人的心肌细胞数据集中的 10% 随机样本，以及来自主动脉数据集的 20% 随机样本其中包含健康和扩张主动脉的细胞</p>
+<ol>
+<li><p>将 GenePT 与预训练的 Geneformer 和 scGPT 的性能进行了比较。</p>
+</li>
+<li><p>这两个样本都用于证明 Geneformer 的实用性。</p>
+</li>
+</ol>
+</li>
+<li><p>目的是区分不同的细胞类型</p>
+</li>
+<li><p>原始数据中细胞类型和患者的批次有强关联</p>
+<ol>
+<li><p>也就是说细胞簇和患者簇之间的ARI很高</p>
+</li>
+<li><p>这就说明批次效应强烈</p>
+</li>
+<li><p>但是不太希望嵌入器有这么高的批次效应</p>
+</li>
+</ol>
+</li>
+<li><p>幸运的是，GenePT等的ARI都不是很高，说明批次效应不明显</p>
+</li>
+</ol>
+<h2 id="小节"><a href="#小节" class="headerlink" title="小节"></a>小节</h2><p>可以看出，在基因任务上的一般思路是先用合适的LLM得到每一种基因的嵌入，也就是实现了从gene text/sequence到gene embedding 的转化。然后利用得到的gene embedding 执行下游任务如：聚类或者分类。这样一来，因为就可以使用聚类或者分类的结果和指标来表征LLM的嵌入效果的好坏。而常见的关于聚类和分类算法的指标有：</p>
+<ol>
+<li>聚类指标：<ol>
+<li>调整兰德指数（Adjusted Rand Index, ARI）：评估聚类结果与真实标签的匹配度，值越高表示对齐效果越好。</li>
+<li>调整互信息（Adjusted Mutual Information, AMI）：测量聚类结果与真实标签之间的互信息，值越高表示聚类结果越接近真实标签。</li>
+<li>轮廓系数（Silhouette Score）：用于衡量聚类的一致性，值越高表示聚类效果越好。</li>
+<li>平均轮廓宽度（Average Silhouette Width, ASW）：使用原始样本的真实注释计算，以评估簇的凝聚力和分离度。</li>
+<li>这些指标可以用于将 k 均值聚类得出的标签与原始样本的真实注释进行比较，从而评估聚类的效果。</li>
+</ol>
+</li>
+<li>分类指标：<ol>
+<li>准确率（Accuracy）：分类正确的样本数占总样本数的比例。</li>
+<li>精确率（Precision）：预测为正类的样本中实际为正类的比例。</li>
+<li>召回率（Recall）：实际为正类的样本中被正确预测为正类的比例。</li>
+<li>F1得分（F1 Score）：精确率和召回率的调和平均数，用于平衡这两者的权重。</li>
+<li>ROC曲线下面积（AUC-ROC）：用于衡量分类模型的整体性能，值越接近1表示模型性能越好。</li>
+<li>类别特定的准确率（Class-Specific Accuracies）：每个类别的准确率，可以通过混淆矩阵（Confusion Matrix）计算得到。</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>混淆矩阵（Confusion Matrix）：一个矩阵表示实际类别与预测类别的对比情况，帮助识别模型在哪些类别上表现较好或较差。</p>
+</blockquote>
+<h1 id="scGPT"><a href="#scGPT" class="headerlink" title="scGPT"></a>scGPT</h1><p>语言和细胞生物学（其中文本由单词组成；类似地，细胞由基因定义）进行比较，探讨了基础模型在推进细胞生物学和基因研究方面的适用性。利用新兴的单细胞测序数据，构建了单细胞生物学的基础模型 scGPT，该模型基于跨超过 3300 万个细胞的存储库的生成预训练 Transformer。scGPT 有效地提炼了有关基因和细胞的关键生物学见解。通过进一步适应迁移学习，可以优化 scGPT，以在不同的下游应用程序中实现卓越的性能。这包括细胞类型注释、多批次集成、多组学集成、扰动响应预测和基因网络推理等任务。</p>
+<h2 id="预训练后的基因嵌入"><a href="#预训练后的基因嵌入" class="headerlink" title="预训练后的基因嵌入"></a>预训练后的基因嵌入</h2><p>预训练后，使用统一流形近似和投影（UMAP）可视化3300 万个细胞中 10% 的人类细胞上的 scGPT 细胞嵌入。局部区域和簇的细胞类型通过不同的颜色准确表示。考虑到数据集中包含 400 多项研究，这证明了预训练提取生物变异的卓越能力。</p>
+<h2 id="scGPT提高了细胞类型注释的精度"><a href="#scGPT提高了细胞类型注释的精度" class="headerlink" title="scGPT提高了细胞类型注释的精度"></a>scGPT提高了细胞类型注释的精度</h2><ol>
+<li>微调预训练的 scGPT 以进行细胞类型注释<ol>
+<li>神经网络分类器（network classifier）将 scGPT 变压器输出细胞嵌入作为输入并输出细胞类型的分类预测。</li>
+<li>整个模型在带有专家注释的参考数据集上使用交叉熵进行训练——微调</li>
+<li>然后用于预测保留的查询数据分区上的细胞类型——验证</li>
+</ol>
+</li>
+<li>对不同的数据集进行了广泛的实验，以评估 scGPT 在细胞类型注释方面的性能。<ol>
+<li>首先，用 scGPT 来预测人类胰腺数据集中的细胞类型，并考虑2个衡量指标<ol>
+<li>预测</li>
+<li>混淆矩阵</li>
+<li>嵌入热图</li>
+</ol>
+</li>
+<li>接下来，在多发性硬化症 (MS) 疾病数据集上测试了该模型。<ol>
+<li>该模型在健康人体免疫细胞的参考分区上进行了微调，并根据对 MS 状况细胞的预测进行了评估。</li>
+<li>同样考虑了混淆矩阵和热图作为衡量指标</li>
+</ol>
+</li>
+<li>最后，在三个数据集中对微调后的 scGPT 与另外两种最近基于 Transformer 的方法 TOSICA31 和 scBERT32 进行了基准测试。 <ol>
+<li>分类指标包括准确度、精确度、召回率和 F1</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="scGPT-预测不可见的遗传扰动反应"><a href="#scGPT-预测不可见的遗传扰动反应" class="headerlink" title="scGPT 预测不可见的遗传扰动反应"></a>scGPT 预测不可见的遗传扰动反应</h2><p>测序和基因编辑技术的最新进展极大地促进了大规模扰动实验，使得能够表征细胞对各种遗传扰动的反应。这种方法对于揭示新的基因相互作用和推进再生医学具有巨大的希望。然而，潜在基因扰动的巨大组合空间很快就超过了实验可行性的实际极限。为了克服这一限制，scGPT 可用于利用从已知实验中的细胞反应中获得的知识，并推断它们以预测未知的反应。在基因维度上利用自注意力机制可以对受干扰的基因与其他基因的响应之间复杂的相互作用进行编码。通过利用这种能力，scGPT 可以有效地从现有的实验数据中学习，并准确预测看不见的扰动的基因表达反应。</p>
+<h3 id="预测不可见基因扰动"><a href="#预测不可见基因扰动" class="headerlink" title="预测不可见基因扰动"></a>预测不可见基因扰动</h3><ul>
+<li><p><strong>扰动预测任务评估</strong></p>
+<ul>
+<li>使用白血病细胞系的三个 Perturb-seq 数据集评估了scGPT：<ol>
+<li><strong>Adamson 数据集</strong><ul>
+<li>包含 87 个单基因扰动</li>
+</ul>
+</li>
+<li><strong>精选的 Replogle 数据集</strong><ul>
+<li>包含 1,823 个单基因扰动</li>
+</ul>
+</li>
+<li><strong>Norman 数据集</strong><ul>
+<li>包含 131 个单基因扰动</li>
+<li>包含 105 个单基因扰动和两基因扰动</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p><strong>评估方法</strong></p>
+<ul>
+<li>为了评估 scGPT 的扰动预测能力，对扰动子集的模型进行了微调，以在给定输入控制细胞状态和干预基因的情况下预测扰动的表达谱。</li>
+<li>接下来，模型对涉及看不见的基因的扰动进行了测试。</li>
+</ul>
+</li>
+<li><p><strong>评估指标</strong></p>
+<ul>
+<li><strong>Pearsondelta 指标</strong><ul>
+<li>衡量预测和观察到的扰动后表达变化之间的相关性。</li>
+</ul>
+</li>
+<li><strong>前 20 个变化最显著基因的指标</strong><ul>
+<li>在差异表达基因上表示为 $Pearson_{\delta}$。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>结果</strong></p>
+<ul>
+<li>使用原始研究的注释，发现相同功能组的扰动条件聚集在邻近区域</li>
+<li>使用 Leiden 对预测的表达进行聚类，观察到这些聚类与扰动组合中的“显性基因”表现出高度关联。</li>
+</ul>
+</li>
+<li><p><strong>示例</strong></p>
+<ul>
+<li><strong>KLF1 基因相关的圆圈簇</strong><ul>
+<li>表明该簇中的数据点经历了涉及 KLF1 和另一个基因（即 KLF1 + X）的组合扰动。</li>
+</ul>
+</li>
+<li><strong>KLF1 和 CNN1 簇</strong><ul>
+<li>验证了相应的预测表达在这些区域中专门高，这与 CRISPRa（CRISPR介导的转录激活）Perturb-seq 实验的预期结果一致。</li>
+</ul>
+</li>
+<li><strong>显性基因簇</strong><ul>
+<li>证明了 scGPT 揭示扰动组合之间关联的能力。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="计算机逆扰动预测"><a href="#计算机逆扰动预测" class="headerlink" title="计算机逆扰动预测"></a>计算机逆扰动预测</h3><ul>
+<li><p><strong>scGPT 的反向扰动预测能力</strong></p>
+<ul>
+<li><p>scGPT 能够预测给定结果细胞状态的遗传扰动来源，其称为计算机反向扰动预测。</p>
+<ul>
+<li>进行这种反向预测的理想预测模型可用于推断谱系发育的重要驱动基因或促进潜在治疗基因靶标的发现。</li>
+<li>这种能力的一个假设应用示例可能是预测影响细胞从疾病状态中恢复的 CRISPR 靶基因。</li>
+</ul>
+</li>
+<li><p>为了展示反向扰动预测的有效性，使用了 Norman 数据集的一个子集，重点关注涉及 20 个基因的扰动。</p>
+<ul>
+<li>该组合空间总共由 210 个单基因或两基因扰动组合组成。</li>
+<li>使用 39 个（18%）已知扰动（图中的训练组）对 scGPT 进行微调。</li>
+<li>然后，对未见过的扰动细胞状态的查询测试了模型，scGPT 成功预测了扰动源（在排名最高的预测内），从而生成了观察到的结果。</li>
+</ul>
+</li>
+<li><p>具体示例：</p>
+<ul>
+<li>scGPT 将 CNN1 + MAPK1 基因的正确扰动列为一个测试示例的最佳预测。</li>
+<li>将 FOSB + UBASH3B 基因的正确扰动列为另一个测试示例的第二预测。</li>
+</ul>
+</li>
+<li><p>整体表现：</p>
+<ul>
+<li>scGPT 在前 1 个预测中平均识别出 91.4% 的相关扰动。</li>
+<li>在前 8 个预测中识别出 65.7% 的正确扰动远远优于 GEARS 和差异基因基线。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="scGPT-支持多批次和多组学集成"><a href="#scGPT-支持多批次和多组学集成" class="headerlink" title="scGPT 支持多批次和多组学集成"></a>scGPT 支持多批次和多组学集成</h2><h3 id="多批次-scRNA-seq-集成"><a href="#多批次-scRNA-seq-集成" class="headerlink" title="多批次 scRNA-seq 集成"></a>多批次 scRNA-seq 集成</h3><ul>
+<li><p><strong>整合多个 scRNA-seq 数据集的挑战</strong></p>
+<ul>
+<li>整合来自不同批次的多个 scRNA-seq 数据集在同时保留整合数据的生物方差和消除技术批次效应方面提出了独特的挑战。</li>
+<li>为了整合测序样本，通过学习恢复隐藏基因表达的统一细胞呈现方式，以自我监督的方式微调 scGPT。</li>
+</ul>
+</li>
+<li><p><strong>与其他集成方法的比较</strong></p>
+<ul>
+<li>在的基准测试实验中，将 scGPT 与三种流行的集成方法进行了比较：scVI38、Seurat39 和 Harmony40。</li>
+<li>评估在三个集成数据集上进行，即 COVID-19（18 批）12、外周血单核细胞（PBMC）10k（两批）41 和鼻周皮质（两批）42 数据集。</li>
+</ul>
+</li>
+<li><p><strong>PBMC 10k 数据集的性能</strong></p>
+<ul>
+<li>在 PBMC 10k 数据集中，scGPT 成功分离了所有细胞类型。</li>
+<li>scGPT 的整合性能得到了其高生物保护评分的进一步支持，AvgBIO 评分为 0.821，比对比方法高 5-10%。</li>
+</ul>
+</li>
+<li><p><strong>AvgBIO 分数</strong></p>
+<ul>
+<li>AvgBIO 分数汇总了三种细胞类型聚类指标，即标准化互信息 (NMIcell)、调整兰德指数 (ARIcell) 和平均轮廓宽度 (ASWcell)</li>
+<li>scGPT 还表现出了相当大的性能，用于集成即使没有微调的 PBMC 10k 数据集，突出了预训练的普遍性。</li>
+</ul>
+</li>
+<li><p><strong>鼻周皮层数据集的性能</strong></p>
+<ul>
+<li>在鼻周皮层数据集的背景下，scGPT 相对于所有其他方法仍然具有竞争力。</li>
+<li>这一发现凸显了从全人类数据集中学到的特征应用于特定器官或组织（例如大脑）时的可转移性和鲁棒性。</li>
+</ul>
+</li>
+<li><p><strong>其他指标表现</strong></p>
+<ul>
+<li>scGPT 在所有集成指标上始终取得有竞争力的分数，并表现出对生物信号的强大保护。</li>
+<li>还制定了加速集成任务微调过程的策略，包括冻结特定模型层并排除不表达的基因，同时保持与原始方法相当的结果。</li>
+</ul>
+</li>
+</ul>
+<h3 id="单细胞多组学整合"><a href="#单细胞多组学整合" class="headerlink" title="单细胞多组学整合"></a>单细胞多组学整合</h3><ul>
+<li><p><strong>scMultiomic 数据集整合</strong></p>
+<ul>
+<li>单细胞多组学 (scMultiomic) 数据结合了遗传调控的多种观点，例如表观遗传、转录组和翻译活动，在保留生物信号的同时聚合细胞表征提出了独特的挑战。</li>
+<li>scGPT 通过有效地提取不同组学数据集中的集成细胞嵌入来解决这一挑战。</li>
+</ul>
+</li>
+<li><p><strong>与其他方法的比较</strong></p>
+<ul>
+<li>在 10x 多组 PBMC 数据集43 中，将 scGPT 与两种最先进的方法 scGLUE13 和 Seurat (v.4)44 进行比较。<ul>
+<li>scGPT 是唯一能够成功生成 CD8+ 初始细胞的独特簇的方法。</li>
+</ul>
+</li>
+<li>在骨髓单核细胞 (BMMC)45 的配对基因表达和蛋白质丰度数据集上测试了 scGPT。<ul>
+<li>scGPT 呈现出比 Seurat (v.4) 更明确的簇结构，AvgBIO 分数提高了 9%。</li>
+<li>scGPT 能够将 CD4+ 初始 T 细胞和 CD4+ 激活 T 细胞分离为两个不同的簇，进一步证实了该模型捕获免疫细胞亚群之间细微差异的能力。</li>
+</ul>
+</li>
+<li>在马赛克数据集成设置中，使用 ATAC 和选择抗原分析 (ASAP) 人类 PBMC 数据集46 作为示例。<ul>
+<li>scGPT 表现出卓越的批量校正性能，特别是在 B、骨髓和自然杀伤 (NK) 细胞组中。</li>
+</ul>
+</li>
+<li>scGPT 表现出卓越的细胞类型聚类性能，并在各种基准生物保护指标中表现出稳健性。</li>
+</ul>
+</li>
+</ul>
+<h2 id="scGPT-揭示特定细胞状态的基因网络"><a href="#scGPT-揭示特定细胞状态的基因网络" class="headerlink" title="scGPT 揭示特定细胞状态的基因网络"></a>scGPT 揭示特定细胞状态的基因网络</h2><p>GRN 背后的转录因子、辅因子、增强子和靶基因之间的相互作用介导重要的生物过程。现有的 GRN 推断方法通常依赖于静态基因表达的相关性或伪时间估计作为因果图的代理。 scGPT 通过基因表达的生成模型进行优化，在其基因嵌入以及注意力图中隐式编码了这种关系。因此，通过探测预训练或微调模型的 scGPT 嵌入和注意力图来提出 GRN 推理工作流程。<br>基因嵌入构建了一个相似性网络，该网络需要在数据集级别上进行基因间相互作用。注意力图进一步捕捉不同细胞状态下独特的基因网络激活模式。</p>
+<ul>
+<li><p><strong>基因标记嵌入的分组和区分</strong></p>
+<ul>
+<li>scGPT 展示了其通过学习基因标记嵌入对功能相关基因进行分组并区分功能不同基因的能力。</li>
+<li>在图 5a 中，使用预训练的 scGPT 模型中的基因嵌入来可视化人类白细胞抗原 (HLA) 蛋白的相似性网络，从而进行了健全性检查。<ul>
+<li>在这种零样本设置中，scGPT 模型成功突出显示了与明确表征的 HLA 类别相对应的两个簇：HLA I 类和 HLA II 类基因。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>HLA 类别的功能</strong></p>
+<ul>
+<li>这些类别编码在免疫环境中发挥不同作用的抗原呈递蛋白。<ul>
+<li>HLA I 类蛋白（由 HLA-A、HLA-C 和 HLA-E 等基因编码）可被 CD8+ T 细胞识别并介导细胞毒性作用。</li>
+<li>HLA II 类蛋白（由 HLA-DRB1、 HLA-DRA 和 HLA-DPA1）被 CD4+ T 细胞识别并触发更广泛的辅助功能。</li>
+</ul>
+</li>
+<li>在“免疫人类”数据集上微调了 scGPT 模型，并探索了该数据集中存在的免疫细胞类型特有的 CD 基因网络。</li>
+</ul>
+</li>
+<li><p><strong>GRN 分析</strong></p>
+<ul>
+<li>为了进行 GRN 分析，使用了与集成任务相同的微调策略。</li>
+<li>预训练的 scGPT 模型成功识别了编码用于 T 细胞激活的 T3 复合物的基因组（CD3E、CD3D 和 CD3G）、用于 B 细胞信号传导的 CD79A 和 CD79B 以及作为 HLA I 类分子共受体的 CD8A 和 CD8B 49。<ul>
+<li>此外，微调的 scGPT 模型强调了 CD36 和 CD14 之间的联系。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>GRN 指的是基因调控网络（Gene Regulatory Network），它是一种描述基因之间相互作用的网络结构。在生物学中，基因调控网络描述了基因与转录因子、miRNA 和其他基因调控元件之间的相互作用关系，以及这些相互作用如何影响基因的表达。基因调控网络对于理解基因调控的复杂性和细胞功能的调控机制非常重要，因为它们可以揭示基因调控网络中的关键因素和通路，并帮助研究人员理解生物体内的信号传导和细胞命运决定过程。</p>
+</blockquote>
+<h2 id="小节-1"><a href="#小节-1" class="headerlink" title="小节"></a>小节</h2><p><code>scGPT</code>和<code>GenePT</code>在下游任务和指标上有一定的重合。相比于<code>GenePT</code>，<code>scGPT</code>的任务要更复杂一些，好多也是第一次见，下面就分析一下。<br>基因扰动分析和计算机逆扰动预测是在基因组学和生物信息学领域中常见的任务，它们通常用于理解基因在细胞状态和生物学过程中的功能和影响。下面是它们的一般流程和一些评价指标：</p>
+<h3 id="基因扰动分析："><a href="#基因扰动分析：" class="headerlink" title="基因扰动分析："></a>基因扰动分析：</h3><ol>
+<li><strong>扰动数据收集：</strong> 收集包含基因扰动实验数据的数据集，例如基因编辑技术（如CRISPR）引发的基因敲除、过表达或突变。</li>
+<li><strong>数据预处理：</strong> 对扰动实验数据进行预处理，包括数据清洗、去除噪声和异常值等。</li>
+<li><strong>特征提取：</strong> 从基因扰动数据中提取特征，这可以包括基因表达水平的变化、蛋白质互作网络的改变等。</li>
+<li><strong>分析和解释：</strong> 使用统计学和机器学习技术分析和解释基因扰动对生物过程的影响，可能会识别关键的调节基因、通路或生物学过程。</li>
+<li><strong>评价指标：</strong> 常用的评价指标包括：<ul>
+<li><strong>差异表达基因（DEGs）数量：</strong> 受扰动后基因表达水平显著变化的基因数量。</li>
+<li><strong>富集分析：</strong> 基因扰动是否导致某些功能通路的显著富集。</li>
+<li><strong>网络拓扑分析：</strong> 基因扰动是否影响了基因调控网络的结构和稳定性。</li>
+<li><strong>生物学效应评估：</strong> 对于特定生物过程或疾病，基因扰动是否导致预期的生物学效应。</li>
+</ul>
+</li>
+</ol>
+<h3 id="计算机逆扰动预测："><a href="#计算机逆扰动预测：" class="headerlink" title="计算机逆扰动预测："></a>计算机逆扰动预测：</h3><ol>
+<li><strong>建模：</strong> 使用机器学习或深度学习方法构建模型，该模型可以从基因表达数据中预测出导致这些表达模式的基因扰动。</li>
+<li><strong>数据准备：</strong> 准备包含基因表达数据和相应基因扰动信息的训练集和测试集。</li>
+<li><strong>特征工程：</strong> 对基因表达数据进行特征工程，可能包括降维、标准化或提取特征。</li>
+<li><strong>模型训练：</strong> 使用训练集训练逆扰动预测模型，调整模型参数以提高预测性能。</li>
+<li><strong>模型评估：</strong> 使用测试集评估模型的性能，通常使用常见的回归或分类指标进行评估。</li>
+<li><strong>评价指标：</strong> 常见的评价指标包括：<ul>
+<li><strong>均方误差（MSE）：</strong> 预测值与真实值之间的平均平方差。</li>
+<li><strong>相关系数（Correlation Coefficient）：</strong> 预测值和真实值之间的线性相关性。</li>
+<li><strong>准确率、召回率、F1 分数：</strong> 对于分类任务，评估模型对基因扰动的分类准确性。</li>
+</ul>
+</li>
+</ol>
+<p>综合来看，基因扰动分析和计算机逆扰动预测是通过对基因表达数据进行分析和建模来理解基因功能和影响的重要工具，评价指标可以帮助评估模型的性能和预测能力。</p>
+<h1 id="geneformer"><a href="#geneformer" class="headerlink" title="geneformer"></a>geneformer</h1>]]></content>
+      <categories>
+        <category>大模型</category>
+        <category>生命科学</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+        <tag>NLP</tag>
+        <tag>Bio</tag>
+        <tag>DNA</tag>
+        <tag>RNA-seq</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>scGPT</title>
+    <url>/blog/2024/05/22/scGPT/</url>
+    <content><![CDATA[<h1>scGPT模型及其在不同任务中的表现</h1>
+<h2 id="作者使用的基准方法和对比方法在不同任务和指标上的表现">作者使用的基准方法和对比方法在不同任务和指标上的表现</h2>
+<p>以下是作者在不同任务下使用的基准方法或对比方法，以及它们在相应指标上的表现总结：</p>
+<h3 id="单细胞RNA测序数据的细胞类型注释">单细胞RNA测序数据的细胞类型注释</h3>
+<ul>
+<li><strong>基准方法</strong>: scBERT 和 TOSICA</li>
+<li><strong>指标</strong>: 准确性(Accuracy)、精确度(Precision)、召回率(Recall)、宏F1分数(Macro F1)</li>
+<li><strong>表现</strong>: 文章中未提供具体数值，但指出scGPT在所有分类指标上都优于这两种方法。</li>
+</ul>
+<h3 id="遗传扰动响应预测">遗传扰动响应预测</h3>
+<ul>
+<li><strong>对比方法</strong>: GEARS 和线性回归模型</li>
+<li><strong>指标</strong>: Pearsondelta 和 Pearsondelta on differentially expressed genes (DE genes)</li>
+<li><strong>表现</strong>: 文章中未提供具体数值，但强调scGPT在所有三个数据集上都取得了最高分，并且在预测扰动后变化的基因表达上，持续优于其他方法5-20%。</li>
+</ul>
+<h3 id="多批次scRNA-seq数据整合">多批次scRNA-seq数据整合</h3>
+<ul>
+<li><strong>对比方法</strong>: Seurat、Harmony 和 scVI</li>
+<li><strong>指标</strong>: AvgBIO分数（包括NMIcell、ARIcell和ASWcell）、AvgBATCH分数（包括ASWbatch和GraphConn）</li>
+<li><strong>表现</strong>: 文章中未提供具体数值，但指出scGPT在PBMC 10k数据集上的表现优于这些方法。</li>
+</ul>
+<h3 id="单细胞多组学数据整合">单细胞多组学数据整合</h3>
+<ul>
+<li><strong>对比方法</strong>: Seurat (v.4)、scGLUE 和 scMoMat</li>
+<li><strong>指标</strong>: NMIcell、ARIcell、ASWcell、AvgBIO以及ASWbatch、GraphConn、AvgBATCH</li>
+<li><strong>表现</strong>: 文章中未提供scGLUE和scMoMat的具体数值表现，但在10x Multiome PBMC数据集上，scGPT是唯一成功生成CD8+ naive细胞独特聚类的方法。在BMMC数据集上，scGPT比Seurat (v.4)展现出更明确的聚类结构。</li>
+</ul>
+<h3 id="基因调控网络推断">基因调控网络推断</h3>
+<ul>
+<li><strong>基准方法</strong>: 基于表达相关性的共表达网络</li>
+<li><strong>指标</strong>: 未明确提及，但进行了路径富集分析以验证基因程序的质量</li>
+<li><strong>表现</strong>: 文章中未提供共表达网络的具体数值表现，但指出scGPT在所有分辨率下识别的富集路径数量显著多于共表达方法。</li>
+</ul>
+<p>请注意，文章中并没有提供所有对比方法的具体数值表现，而是通过比较来强调scGPT在各个任务中的优越性能。为了获得其他方法的详细表现数据，可能需要查阅原始的基准测试或方法论文。</p>
+<h1>scGPT模型验证采用的数据集</h1>
+<p>作者在验证scGPT模型的有效性时，使用了多个数据集，并针对不同的任务和指标进行了评估。以下是使用的各个数据集、对应的任务以及评估所用的指标：</p>
+<ol>
+<li>
+<p><strong>CELLxGENE scRNA-seq数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 用于构建全人类基础模型的预训练。</li>
+<li><strong>指标</strong>: 未明确提及，但这是构建模型的基础数据集。</li>
+</ul>
+</li>
+<li>
+<p><strong>多发性硬化症(MS)数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 细胞类型注释。</li>
+<li><strong>指标</strong>: 准确性(Accuracy)、精确度(Precision)、召回率(Recall)、宏F1分数(Macro F1)。</li>
+</ul>
+</li>
+<li>
+<p><strong>骨髓瘤(Myeloid)数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 细胞类型注释、遗传扰动响应预测。</li>
+<li><strong>指标</strong>: 同上。</li>
+</ul>
+</li>
+<li>
+<p><strong>人类胰腺(Human Pancreas)数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 细胞类型注释。</li>
+<li><strong>指标</strong>: 同上。</li>
+</ul>
+</li>
+<li>
+<p><strong>PBMC 10k数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 多批次scRNA-seq数据整合。</li>
+<li><strong>指标</strong>: AvgBIO分数（包括NMIcell、ARIcell和ASWcell）、AvgBATCH分数（包括ASWbatch和GraphConn）。</li>
+</ul>
+</li>
+<li>
+<p><strong>周围皮层(Perirhinal Cortex)数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 多批次scRNA-seq数据整合。</li>
+<li><strong>指标</strong>: 同上。</li>
+</ul>
+</li>
+<li>
+<p><strong>COVID-19数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 多批次scRNA-seq数据整合。</li>
+<li><strong>指标</strong>: 同上。</li>
+</ul>
+</li>
+<li>
+<p><strong>Adamson、Norman和Replogle数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 遗传扰动响应预测。</li>
+<li><strong>指标</strong>: Pearsondelta、Pearsondelta on differentially expressed genes (DE genes)。</li>
+</ul>
+</li>
+<li>
+<p><strong>10x Multiome PBMC数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 单细胞多组学(scMultiomic)数据整合。</li>
+<li><strong>指标</strong>: NMIcell、ARIcell、ASWcell、AvgBIO以及ASWbatch、GraphConn、AvgBATCH。</li>
+</ul>
+</li>
+<li>
+<p><strong>BMMC数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 单细胞多组学数据整合。</li>
+<li><strong>指标</strong>: 同上。</li>
+</ul>
+</li>
+<li>
+<p><strong>ASAP PBMC数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 单细胞多组学数据整合。</li>
+<li><strong>指标</strong>: 同上。</li>
+</ul>
+</li>
+<li>
+<p><strong>免疫人类(Immune Human)数据集</strong>:</p>
+<ul>
+<li><strong>任务</strong>: 基因调控网络推断。</li>
+<li><strong>指标</strong>: 未明确提及，但通过与已知生物学和功能组的一致性来验证网络的质量。</li>
+</ul>
+</li>
+</ol>
+<p>这些数据集覆盖了从基础模型预训练到各种下游应用的广泛任务，作者通过这些任务和指标全面评估了scGPT模型的性能。</p>
+<h1>scGPT模型的验证</h1>
+<p>文章中，作者为了验证模型scGPT的有效性，设计了多个下游任务，并使用了不同的方法和指标来衡量模型的表现情况。以下是各个下游任务、衡量方法和指标的总结：</p>
+<ol>
+<li>
+<p><strong>单细胞RNA测序(cell type annotation)</strong>:</p>
+<ul>
+<li><strong>方法</strong>: 使用神经网络分类器对scGPT变换器输出的细胞嵌入进行分类，预测细胞类型。</li>
+<li><strong>指标</strong>: 准确性(Accuracy)、精确度(Precision)、召回率(Recall)、宏F1分数(Macro F1)。</li>
+<li><strong>意义</strong>: 这些指标评估了模型在细胞类型分类任务上的性能，包括整体的准确性、对每个类别的精确度和召回率，以及一个综合考虑类别权重的宏F1分数。</li>
+<li><strong>结果</strong>: scGPT在多个数据集上的表现超过了其他方法，包括准确度、精确度、召回率和宏F1分数。</li>
+</ul>
+</li>
+<li>
+<p><strong>遗传扰动响应预测(Perturbation response prediction)</strong>:</p>
+<ul>
+<li><strong>方法</strong>: 使用Pearsondelta指标来衡量预测和观察到的扰动后基因表达变化之间的相关性。</li>
+<li><strong>指标</strong>: Pearsondelta、Pearsondelta on differentially expressed genes（DE genes）。</li>
+<li><strong>意义</strong>: 这些指标衡量了模型对于未见过的基因扰动响应的预测能力，特别是在预测最显著变化的基因上的表现。</li>
+<li><strong>结果</strong>: scGPT在预测未见基因扰动响应的任务上取得了最高的分数，并且在所有三个数据集上都优于其他方法。</li>
+</ul>
+</li>
+<li>
+<p><strong>多批次scRNA-seq数据整合(Multi-batch scRNA-seq integration)</strong>:</p>
+<ul>
+<li><strong>方法</strong>: 使用scGPT进行自监督微调，学习统一的细胞表示以恢复掩蔽的基因表达。</li>
+<li><strong>指标</strong>: AvgBIO分数（包括NMIcell、ARIcell和ASWcell）和AvgBATCH分数（包括ASWbatch和GraphConn）。</li>
+<li><strong>意义</strong>: AvgBIO分数衡量了数据整合后细胞类型聚类与真实标签的一致性，而AvgBATCH分数衡量了批次效应校正的性能。</li>
+<li><strong>结果</strong>: scGPT在PBMC 10k数据集上成功分离了所有细胞类型，并且在AvgBIO分数上比比较方法高出5-10%。</li>
+</ul>
+</li>
+<li>
+<p><strong>单细胞多组学(scMultiomic)数据整合</strong>:</p>
+<ul>
+<li><strong>方法</strong>: 对于配对和马赛克数据整合设置，scGPT与Seurat (v.4)、scGLUE和scMoMat等方法进行比较。</li>
+<li><strong>指标</strong>: NMIcell、ARIcell、ASWcell、AvgBIO以及ASWbatch、GraphConn、AvgBATCH。</li>
+<li><strong>意义</strong>: 这些指标评估了模型在整合不同组学数据时保持生物学信号和校正批次效应的能力。</li>
+<li><strong>结果</strong>: scGPT在10x Multiome PBMC数据集上成功生成了CD8+ naive细胞的独特聚类，并且在BMMC数据集上展现了更明确的聚类结构。</li>
+</ul>
+</li>
+<li>
+<p><strong>基因调控网络推断(Gene regulatory network inference)</strong>:</p>
+<ul>
+<li><strong>方法</strong>: 使用scGPT嵌入和注意力图来推断基因调控网络。</li>
+<li><strong>指标</strong>: 未明确提及，但通过与已知生物学和功能组的一致性来验证网络的质量。</li>
+<li><strong>意义</strong>: 这些分析评估了scGPT在推断基因间复杂关系和特定细胞状态下的基因调控网络的能力。</li>
+<li><strong>结果</strong>: scGPT能够通过学习到的基因嵌入和注意力图来揭示生物学上有意义的基因调控网络。</li>
+</ul>
+</li>
+</ol>
+<p>在所有这些任务中，scGPT模型都展现出了优越的性能，这表明了其在单细胞多组学数据建模方面的有效性和潜力。</p>
+<h1>scGPT验证指标的表现</h1>
+<p>在文章中，作者通过多个下游任务验证了scGPT模型的有效性，并在各项任务和指标上展示了其出色的表现：</p>
+<ol>
+<li>
+<p><strong>单细胞RNA测序数据的细胞类型注释</strong>:</p>
+<ul>
+<li><strong>表现</strong>: scGPT在人类胰腺数据集上实现了高精确度(&gt;0.8)，并且在多边形混淆矩阵中，大多数细胞类型的预测结果准确。在疾病数据集（如多发性硬化症MS）上，scGPT模型在细胞类型注释上达到了约0.85的高准确率。在肿瘤浸润性髓系数据集上，scGPT在区分免疫细胞亚型方面表现出高精确度。</li>
+</ul>
+</li>
+<li>
+<p><strong>遗传扰动响应预测</strong>:</p>
+<ul>
+<li><strong>表现</strong>: 在三个Perturb-seq数据集上评估scGPT的扰动预测能力，scGPT在预测未见基因的扰动响应方面表现优异，通过Pearsondelta指标衡量，scGPT在所有数据集上都取得了最高分，特别是在预测扰动后变化的基因表达上，持续优于其他方法5-20%。</li>
+</ul>
+</li>
+<li>
+<p><strong>多批次scRNA-seq数据整合</strong>:</p>
+<ul>
+<li><strong>表现</strong>: 在COVID-19、PBMC 10k和周围皮层数据集上的整合性能评估中，scGPT在细胞类型聚类和批次效应校正方面展现出了优越的整合性能，AvgBIO分数比其他方法高出5-10%。</li>
+</ul>
+</li>
+<li>
+<p><strong>单细胞多组学数据整合</strong>:</p>
+<ul>
+<li><strong>表现</strong>: 在10x Multiome PBMC数据集上，scGPT是唯一成功生成CD8+ naive细胞独特聚类的方法。在BMMC数据集上，scGPT比Seurat (v.4)展现出更明确的聚类结构，并且在AvgBIO分数上提高了9%。</li>
+</ul>
+</li>
+<li>
+<p><strong>基因调控网络推断</strong>:</p>
+<ul>
+<li><strong>表现</strong>: scGPT能够成功识别与T细胞激活相关的基因群组，如编码T3复合体的CD3基因群，以及与B细胞信号传导和HLA类I分子的共受体相关的基因。在免疫人类数据集上，scGPT模型突出显示了与特定免疫细胞类型相关的CD基因网络。</li>
+</ul>
+</li>
+</ol>
+<p>总体而言，scGPT在所有这些任务中都展现出了卓越的性能，不仅在精确度、准确率、召回率和F1分数等指标上超越了其他方法，而且还能够揭示生物学上有意义的基因调控网络，证明了其在单细胞生物学和遗传研究中的潜力和应用价值。</p>
+<h1>scGPT模型验证详情</h1>
+<table>
+<thead>
+<tr>
+<th>任务类型</th>
+<th>任务描述</th>
+<th>模型表现</th>
+<th>评估指标</th>
+<th>数据集</th>
+<th>基准/对比方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>细胞类型注释</td>
+<td>对单细胞RNA测序数据进行细胞类型的分类和注释</td>
+<td>在人类胰腺数据集上实现高精确度(&gt;0.8)；在MS数据集上达到约0.85的准确率</td>
+<td>准确性(Accuracy)、精确度(Precision)、召回率(Recall)、宏F1分数(Macro F1)</td>
+<td>多发性硬化症(MS)数据集、人类胰腺数据集、骨髓瘤(Myeloid)数据集</td>
+<td>scBERT、TOSICA</td>
+</tr>
+<tr>
+<td>遗传扰动响应预测</td>
+<td>预测基因扰动后的细胞响应</td>
+<td>在三个Perturb-seq数据集上持续优于其他方法5-20%</td>
+<td>Pearsondelta、Pearsondelta on DE genes</td>
+<td>Adamson、Norman、Replogle数据集</td>
+<td>GEARS、线性回归模型</td>
+</tr>
+<tr>
+<td>多批次scRNA-seq数据整合</td>
+<td>整合来自不同批次的单细胞RNA测序数据</td>
+<td>在PBMC 10k数据集上成功分离所有细胞类型，AvgBIO分数比其他方法高出5-10%</td>
+<td>AvgBIO分数（NMIcell、ARIcell、ASWcell）、AvgBATCH分数（ASWbatch、GraphConn）</td>
+<td>COVID-19数据集、PBMC 10k数据集、周围皮层数据集</td>
+<td>Seurat、Harmony、scVI</td>
+</tr>
+<tr>
+<td>单细胞多组学数据整合</td>
+<td>整合单细胞多组学数据</td>
+<td>在10x Multiome PBMC数据集上成功生成CD8+ naive细胞独特聚类；在BMMC数据集上展现更明确聚类结构</td>
+<td>NMIcell、ARIcell、ASWcell、AvgBIO、ASWbatch、GraphConn、AvgBATCH</td>
+<td>10x Multiome PBMC数据集、BMMC数据集、ASAP PBMC数据集</td>
+<td>Seurat (v.4)、scGLUE、scMoMat</td>
+</tr>
+<tr>
+<td>基因调控网络推断</td>
+<td>推断基因间的调控网络</td>
+<td>能够揭示生物学上有意义的基因调控网络</td>
+<td>未明确提及，通过与已知生物学和功能组的一致性来验证</td>
+<td>免疫人类(Immune Human)数据集</td>
+<td>基于表达相关性的共表达网络</td>
+</tr>
+</tbody>
+</table>
+<!-- # 数据集和基准/对比方法信息
+
+| 数据集/方法 | 描述 | 链接/文章 |
+|--------------|------|-----------|
+| MS数据集     | 多发性硬化症相关的单细胞RNA测序数据集 | 待查询 |
+| 人类胰腺数据集 | 人类胰腺细胞的单细胞RNA测序数据集 | 待查询 |
+| Myeloid数据集 | 骨髓瘤相关的单细胞RNA测序数据集 | 待查询 |
+| COVID-19数据集 | 与COVID-19相关的单细胞RNA测序数据集 | 待查询 |
+| scBERT       | 用于细胞类型注释的基准方法 | 待查询 |
+| TOSICA       | 用于细胞类型注释的基准方法 | 待查询 |
+| GEARS        | 遗传扰动响应预测的对比方法 | 待查询 |
+| Seurat       | 多批次数据整合的对比方法 | 待查询 |
+| Harmony      | 多批次数据整合的对比方法 | 待查询 |
+| scVI         | 多批次数据整合的对比方法 | 待查询 |
+| scGLUE       | 单细胞多组学数据整合的对比方法 | 待查询 |
+| scMoMat      | 单细胞多组学数据整合的对比方法 | 待查询 |
+
+请注意，表格中的链接和文章列需要你根据上述指导自行查询和填写。
+
+根据您提供的文件内容，我们可以创建一个表格，列出scGPT模型验证中使用的数据集、基准/对比方法以及相关的文献引用。请注意，由于我无法访问外部数据库来检索具体的文献链接，以下表格中的引用信息是基于您提供的文件内容整理的，您可能需要根据具体的文献引用去查找相应的文章和链接。 -->
+<h1>scGPT模型验证中使用的数据集和基准/对比方法</h1>
+<table>
+<thead>
+<tr>
+<th>数据集</th>
+<th>描述</th>
+<th>文献引用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CELLxGENE scRNA-seq数据集</td>
+<td>用于构建全人类基础模型的预训练</td>
+<td><a href="https://icbi-lab.github.io/cellxgene-user-guide/">cellxgene</a></td>
+</tr>
+<tr>
+<td>MS数据集</td>
+<td>多发性硬化症相关的单细胞RNA测序数据集</td>
+<td><a href="https://www.ebi.ac.uk/gxa/sc/experiments/E-HCAD-35">E-HCAD-35</a></td>
+</tr>
+<tr>
+<td>Myeloid数据集</td>
+<td>骨髓瘤相关的单细胞RNA测序数据集</td>
+<td><a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE154763">GSE154763</a></td>
+</tr>
+<tr>
+<td>Human Pancreas数据集</td>
+<td>人类胰腺细胞的单细胞RNA测序数据集</td>
+<td><a href="https://github.com/JackieHanLab/TOSICA">TOSICA</a></td>
+</tr>
+<tr>
+<td>PBMC 10k数据集</td>
+<td>人类PBMC细胞的单细胞RNA测序数据集</td>
+<td><a href="https://scvi-tools.org/">scVI tools</a></td>
+</tr>
+<tr>
+<td>Perirhinal Cortex数据集</td>
+<td>来自人脑皮层的单细胞数据集</td>
+<td><a href="https://cellxgene.cziscience.com/">CELLxGENE Human Brain Cell Atlas</a></td>
+</tr>
+<tr>
+<td>COVID-19数据集</td>
+<td>与COVID-19相关的单细胞RNA测序数据集</td>
+<td><a href="https://github.com/theislab/scarches-reproducibility">scarches-reproducibility</a></td>
+</tr>
+<tr>
+<td>Adamson数据集</td>
+<td>CRISPR干扰的基因表达数据集</td>
+<td><a href="https://dataverse.harvard.edu/">哈佛数据集</a></td>
+</tr>
+<tr>
+<td>Norman数据集</td>
+<td>Perturb-seq技术得到的基因表达数据集</td>
+<td><a href="https://dataverse.harvard.edu/">哈佛数据集</a></td>
+</tr>
+<tr>
+<td>Replogle数据集</td>
+<td>K562白血病细胞系的基因组范围扰动数据</td>
+<td><a href="https://gwps.wi.mit.edu/">MIT数据集</a></td>
+</tr>
+<tr>
+<td>10x Multiome PBMC数据集</td>
+<td>单细胞多组学数据集</td>
+<td><a href="https://scglue.readthedocs.io/en/latest/data.html">scGLUE</a></td>
+</tr>
+<tr>
+<td>BMMC数据集</td>
+<td>包含RNA和蛋白的单细胞多组学数据集</td>
+<td><a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE194122">GSE194122</a></td>
+</tr>
+<tr>
+<td>ASAP PBMC数据集</td>
+<td>包含多种数据模态的单细胞数据集</td>
+<td><a href="https://github.com/PeterZZQ/scMoMaT/">scMoMaT</a></td>
+</tr>
+<tr>
+<td>Immune Human数据集</td>
+<td>用于基因调控网络推断的单细胞数据集</td>
+<td><a href="https://doi.org/10.6084/m9.figshare.12420968.v8">Figshare</a></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>基准/对比方法</th>
+<th>描述</th>
+<th>评估指标</th>
+<th>文献引用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>scBERT</td>
+<td>用于细胞类型注释的基准方法</td>
+<td>准确性(Accuracy)、精确度(Precision)、召回率(Recall)、宏F1分数(Macro F1)</td>
+<td><a href="https://www.nature.com/articles/s42256-022-00534-z">scBERT</a></td>
+</tr>
+<tr>
+<td>TOSICA</td>
+<td>用于细胞类型注释的基准方法</td>
+<td>同上</td>
+<td><a href="https://www.nature.com/articles/s41467-023-35923-4">TOSICA</a></td>
+</tr>
+<tr>
+<td>GEARS</td>
+<td>遗传扰动响应预测的对比方法</td>
+<td>Pearsondelta 和 Pearsondelta on differentially expressed genes (DE genes)</td>
+<td><a href="https://www.nature.com/articles/s41587-023-01905-6">GEARS</a></td>
+</tr>
+</tbody>
+</table>
+<!-- | 线性回归模型 | 遗传扰动响应预测的对比方法 | 同上 | [文献引用待查询] | -->
+<p>| Seurat        | 多批次scRNA-seq数据整合的对比方法 | AvgBIO分数（包括NMIcell、ARIcell和ASWcell）、AvgBATCH分数（包括ASWbatch和GraphConn） | <a href="https://www.nature.com/articles/nbt.3192">Seurat</a> |<br>
+| Harmony       | 多批次scRNA-seq数据整合的对比方法 | 同上 | <a href="https://www.nature.com/articles/s41592-019-0619-0">Harmony</a> |<br>
+| scVI          | 多批次scRNA-seq数据整合的对比方法 | 同上 | <a href="https://www.nature.com/articles/s41592-018-0229-2">scVI</a> |<br>
+| scGLUE        | 单细胞多组学数据整合的对比方法 | NMIcell、ARIcell、ASWcell、AvgBIO以及ASWbatch、GraphConn、AvgBATCH | <a href="https://www.nature.com/articles/s41587-022-01284-4">scGLUE</a> |<br>
+| scMoMat       | 单细胞多组学数据整合的对比方法 | 同上 | <a href="https://www.nature.com/articles/s41467-023-36066-2">scMoMat</a> |<br>
+| coexpression network   | 基因调控网络推断的基准方法 | 未明确提及，但通过与已知生物学和功能组的一致性来验证 | <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-04179-4">coexpression network</a> |</p>
+]]></content>
+      <categories>
+        <category>大模型</category>
+        <category>生命科学</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+        <tag>Bio</tag>
+        <tag>RNA-seq</tag>
+        <tag>scGPT</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>genePT</title>
+    <url>/blog/2024/05/22/GenePT/</url>
+    <content><![CDATA[<p>这篇文章介绍了一个名为GenePT的模型，该模型利用大型语言模型（如GPT-3.5）来生成基因和细胞的嵌入表示，以便于单细胞生物学分析。作者设计了一系列下游任务来验证GenePT模型的有效性，并与现有的单细胞基础模型（如Geneformer和scGPT）进行了比较。以下是文章中提到的下游任务、衡量方法、指标以及数据集的总结：</p>
+<h3 id="下游任务：">下游任务：</h3>
+<ol>
+<li><strong>基因功能类别预测</strong>：预测基因属于的最常见的15个功能类别之一。</li>
+<li><strong>基因属性预测</strong>：包括区分剂量敏感与不敏感的转录因子、区分不同的基因甲基化状态等。</li>
+<li><strong>基因-基因相互作用预测</strong>：预测两个基因是否相互作用。</li>
+<li><strong>蛋白质-蛋白质相互作用预测</strong>：预测两个蛋白质之间是否存在相互作用。</li>
+<li><strong>细胞类型注释</strong>：基于细胞的嵌入表示预测细胞的类型。</li>
+<li><strong>批次效应评估</strong>：评估嵌入表示在去除批次效应的同时保留生物学信息的能力。</li>
+</ol>
+<h3 id="衡量方法和指标：">衡量方法和指标：</h3>
+<ul>
+<li><strong>准确率（Accuracy）</strong>：正确预测的数量除以总预测数量。</li>
+<li><strong>精确度（Precision）</strong>：正确预测为正的数量除以预测为正的总数量。</li>
+<li><strong>召回率（Recall）</strong>：正确预测为正的数量除以实际为正的总数量。</li>
+<li><strong>F1分数</strong>：精确度和召回率的调和平均值，衡量模型的准确性和完整性的平衡。</li>
+<li><strong>ROC-AUC</strong>：接收者操作特征曲线下的面积，衡量分类器在所有可能的分类阈值上的性能。</li>
+<li><strong>Adjusted Rand Index (ARI)</strong> 和 <strong>Adjusted Mutual Information (AMI)</strong>：评估聚类结果与真实标签之间的一致性。</li>
+</ul>
+<h3 id="作者的指标表现：">作者的指标表现：</h3>
+<p>文章中提到GenePT在多个任务上的表现与Geneformer和其他模型相当，甚至在一些任务上表现更好。</p>
+<h4 id="Gene功能类别预测：">Gene功能类别预测：</h4>
+<ul>
+<li><strong>GenePT</strong>：整体准确率达到96%，类具体准确度和只有小幅度的误分类。</li>
+</ul>
+<h4 id="基因-基因相互作用预测-GGI-：">基因-基因相互作用预测 (GGI)：</h4>
+<ul>
+<li><strong>GenePT</strong>：使用共享基因本体 (GO) 注释的测试GGI数据集，ROC-AUC为0.82。</li>
+</ul>
+<h4 id="蛋白质-蛋白质相互作用预测-PPI-：">蛋白质-蛋白质相互作用预测 (PPI)：</h4>
+<ul>
+<li><strong>GenePT</strong>：在三个不同的PPI数据集上，ROC-AUC分别为：
+<ul>
+<li>文献衍生数据集：ROC-AUC未明确给出，但提到表现优于其他模型。</li>
+<li>综合检测数据集：ROC-AUC未明确给出，但提到表现优于其他模型。</li>
+<li>组织特异性蛋白质-蛋白质功能网络数据集：ROC-AUC未明确给出，但提到表现优于其他模型。</li>
+</ul>
+</li>
+</ul>
+<h4 id="细胞类型注释：">细胞类型注释：</h4>
+<ul>
+<li><strong>GenePT-w</strong> 和 <strong>GenePT-s</strong> 在多个数据集上的表现与 <strong>scGPT</strong> 和 <strong>Geneformer</strong> 相比较：
+<ul>
+<li><strong>Aorta 数据集</strong>：
+<ul>
+<li>GenePT-w: ARI=0.12, AMI=0.12, ASW=0.01</li>
+<li>GenePT-s: ARI=0.09, AMI=0.12, ASW=-0.04</li>
+</ul>
+</li>
+<li><strong>Artery 数据集</strong>：
+<ul>
+<li>GenePT-w: ARI=0.47, AMI=0.64, ASW=0.18</li>
+<li>GenePT-s: ARI=0.36, AMI=0.59, ASW=0.15</li>
+</ul>
+</li>
+<li><strong>Bones 数据集</strong>：
+<ul>
+<li>GenePT-w: ARI=0.12, AMI=0.21, ASW=-0.01</li>
+<li>GenePT-s: ARI=0.21, AMI=0.29, ASW=0.02</li>
+</ul>
+</li>
+<li><strong>Myeloid 数据集</strong>（癌症类型）：
+<ul>
+<li>GenePT-w: ARI=0.25, AMI=0.27, ASW=0.02</li>
+<li>GenePT-s: ARI=0.17, AMI=0.17, ASW=0.06</li>
+</ul>
+</li>
+<li><strong>Pancreas 数据集</strong>：
+<ul>
+<li>GenePT-w: ARI=0.49, AMI=0.69, ASW=0.15</li>
+<li>GenePT-s: ARI=0.30, AMI=0.50, ASW=0.10</li>
+</ul>
+</li>
+<li><strong>Multiple Sclerosis 数据集</strong>（年龄）：
+<ul>
+<li>GenePT-w: ARI=0.07, AMI=0.13, ASW=-0.07</li>
+<li>GenePT-s: ARI=0.06, AMI=0.12, ASW=-0.03</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="批次效应评估：">批次效应评估：</h4>
+<ul>
+<li><strong>GenePT</strong> 在去除批次效应的同时保留生物学信息的能力表现良好，与 <strong>scGPT</strong> 和 <strong>Geneformer</strong> 相比，在多个数据集上的ARI值降低，表明批次效应较小。</li>
+</ul>
+<blockquote>
+<p>ARI和AMI用来衡量聚类结果与真实标签之间的一致性，ASW用来评估聚类结果的凝聚度和分离度。<br>
+GenePT在多数任务中展现出与现有模型相当的或更好的性能。</p>
+</blockquote>
+<h3 id="数据集：">数据集：</h3>
+<ul>
+<li><strong>基因功能类别预测</strong>：使用特定的基因功能类别数据集。</li>
+<li><strong>基因属性预测</strong>：使用Theodoris等人提供的开源数据。</li>
+<li><strong>基因-基因相互作用预测</strong>：使用Du等人基于共享基因本体注释的基准数据集。</li>
+<li><strong>蛋白质-蛋白质相互作用预测</strong>：使用了多个数据集，包括HuRI、Lit-BM和Greene等人提供的组织特异性蛋白质-蛋白质功能网络。</li>
+<li><strong>细胞类型注释</strong>：使用了来自循环系统（Aorta、Artery）、骨组织（Bones、Myeloid）、胰腺和来自健康个体以及多发性硬化症患者的免疫细胞的数据集。</li>
+</ul>
+<h3 id="基准方法和对比方法：">基准方法和对比方法：</h3>
+<p>文章中提到了Geneformer和scGPT作为基准方法。这些方法在不同的任务和指标上的表现被用来与GenePT进行比较。具体的数值表现和比较分析可能在文章的实验部分有详细说明。</p>
+<h3 id="总结">总结</h3>
+<table>
+<thead>
+<tr>
+<th>任务类型</th>
+<th>指标</th>
+<th>GenePT表现</th>
+<th>数据集名称</th>
+<th>基准/对比方法</th>
+<th>引用链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gene Functionality Class Prediction</td>
+<td>Accuracy</td>
+<td>96%</td>
+<td>-</td>
+<td>Geneformer等</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Gene Property Prediction Tasks</td>
+<td>Various</td>
+<td>未具体说明</td>
+<td>-</td>
+<td>Gene2vec, scGPT</td>
+<td><a href="https://www.nature.com/articles/s41586-023-05903-5">Theodoris et al. 2023</a></td>
+</tr>
+<tr>
+<td>Gene-Gene Interaction Prediction</td>
+<td>ROC-AUC</td>
+<td>0.82</td>
+<td>GEO expression data</td>
+<td>Gene2vec/scGPT/Geneformer</td>
+<td><a href="https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-019-5977-5">Du et al. 2019</a></td>
+</tr>
+<tr>
+<td>Protein-Protein Interaction Prediction</td>
+<td>ROC-AUC</td>
+<td>未明确给出，但优于其他模型</td>
+<td>HuRI, Lit-BM, Tissue-specific PPI networks</td>
+<td>Other models</td>
+<td><a href="https://www.nature.com/articles/nature5803-402">HuRI dataset</a>, <a href="https://www.cell.com/cell/fulltext/S0092-8674(14)01212-6">Lit-BM dataset</a>, <a href="https://www.nature.com/articles/ng.3295">Tissue-specific PPI networks</a></td>
+</tr>
+<tr>
+<td>Cell Type Annotation</td>
+<td>ARI, AMI, ASW</td>
+<td>根据不同数据集而异</td>
+<td>Aorta, Artery, Bones等</td>
+<td>scGPT, Geneformer</td>
+<td><a href="https://www.nature.com/articles/nature608174">Chaffin et al. 2022</a>, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7232955/">Li et al. 2020</a></td>
+</tr>
+<tr>
+<td>Batch Effect Assessment</td>
+<td>ARI</td>
+<td>降低，表明批次效应较小</td>
+<td>Cardiomyocyte dataset, Aorta dataset</td>
+<td>Geneformer, scGPT</td>
+<td><a href="https://www.ebi.ac.uk/gxa/home">Chaffin et al. dataset</a>, <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE149769">Li et al. dataset</a></td>
+</tr>
+</tbody>
+</table>
+]]></content>
+      <categories>
+        <category>大模型</category>
+        <category>生命科学</category>
+      </categories>
+      <tags>
+        <tag>LLM</tag>
+        <tag>Bio</tag>
+        <tag>RNA-seq</tag>
+        <tag>GenePT</tag>
+      </tags>
+  </entry>
 </search>
