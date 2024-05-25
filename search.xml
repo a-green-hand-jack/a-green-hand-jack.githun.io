@@ -162,7 +162,7 @@ $$</p>
 ]]></content>
       <categories>
         <category>机器学习</category>
-        <category>CS231n-深度学习与计算机视觉-RNN</category>
+        <category>vision</category>
       </categories>
       <tags>
         <tag>Machine Learning</tag>
@@ -1480,6 +1480,12 @@ $$</p>
     <title>genePT</title>
     <url>/blog/2024/05/22/GenePT/</url>
     <content><![CDATA[<p>这篇文章介绍了一个名为GenePT的模型，该模型利用大型语言模型（如GPT-3.5）来生成基因和细胞的嵌入表示，以便于单细胞生物学分析。作者设计了一系列下游任务来验证GenePT模型的有效性，并与现有的单细胞基础模型（如Geneformer和scGPT）进行了比较。以下是文章中提到的下游任务、衡量方法、指标以及数据集的总结：</p>
+<h3 id="模型复杂度">模型复杂度</h3>
+<p>scGPT模型的具体参数数量没有直接提及。然而，文章中提到了模型的一些架构细节，例如：</p>
+<ol>
+<li>预训练基础模型: 嵌入大小为512，包含12个堆叠的变换器块（transformer blocks），每个块有8个注意力头（attention heads）。</li>
+<li>全连接层: 隐藏层大小为512。</li>
+</ol>
 <h3 id="下游任务：">下游任务：</h3>
 <ol>
 <li><strong>基因功能类别预测</strong>：预测基因属于的最常见的15个功能类别之一。</li>
@@ -1571,7 +1577,7 @@ GenePT在多数任务中展现出与现有模型相当的或更好的性能。</
 </blockquote>
 <h3 id="数据集：">数据集：</h3>
 <ul>
-<li><strong>基因功能类别预测</strong>：使用特定的基因功能类别数据集。</li>
+<li><strong>基因功能类别预测</strong>：使用特定的基因功能类别数据集（geneformer）。</li>
 <li><strong>基因属性预测</strong>：使用Theodoris等人提供的开源数据。</li>
 <li><strong>基因-基因相互作用预测</strong>：使用Du等人基于共享基因本体注释的基准数据集。</li>
 <li><strong>蛋白质-蛋白质相互作用预测</strong>：使用了多个数据集，包括HuRI、Lit-BM和Greene等人提供的组织特异性蛋白质-蛋白质功能网络。</li>
@@ -1652,6 +1658,75 @@ GenePT在多数任务中展现出与现有模型相当的或更好的性能。</
         <tag>Bio</tag>
         <tag>RNA-seq</tag>
         <tag>GenePT</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>在GCP上建立虚拟机实例</title>
+    <url>/blog/2024/05/25/%E5%9C%A8GCP%E4%B8%8A%E5%BB%BA%E7%AB%8B%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AE%9E%E4%BE%8B/</url>
+    <content><![CDATA[<h1>创建实例</h1>
+<p>进入<a href="https://console.cloud.google.com/">GCP网页</a>后，会自动跳转到对应的项目的欢迎页下，如图所示：</p>
+<p><img src="welcome.png" alt="welcome"></p>
+<p>随后点击<strong>Create a VM</strong>进入建立实例的页面，如图所示：</p>
+<p><img src="create_vm.png" alt="Create Virtual Machine"></p>
+<p>在这里，根据自己的需要选择合适的区域、机器配置、启动磁盘，设置对应的身份和 API 访问权限、防火墙、高级选项-网络等。</p>
+<p>设置好后，就点击<strong>创建</strong>。</p>
+<blockquote>
+<p>值得注意的是，有时会在<strong>每月估算费用</strong>那里显示<strong>缺少额度</strong>，只要点击下面的<em>申请</em>就可以了，一般10分分钟内就能通过请求。</p>
+<p>在选择机器时，GPU的配置往往时重点，这个<a href="https://cloud.google.com/compute/docs/gpus/gpu-regions-zones?hl=zh-cn">表格</a>展示了GCP在不同区域提供的GPU的型号。</p>
+</blockquote>
+<p>如此一来就可以在<strong>虚拟机实例</strong>界面中看到自己建立的vm了，如图：</p>
+<p><img src="vm.png" alt="vm"></p>
+<h1>ssh 连接</h1>
+<h2 id="web连接">web连接</h2>
+<p>在建立好vm后，就可以使用ssh和vm连接了，这也很简单，如图所示：</p>
+<p><img src="sshweb.png" alt="ssh web"></p>
+<p>只要点击<strong>在浏览器窗口打开</strong>就可以进入到vm中，如图所示：</p>
+<p><img src="sshwebnvidia.png" alt="ssh web nvidia"></p>
+<blockquote>
+<p>这里因为我需要使用GPU所以选择了预装了nvidia和cuda的<strong>映像</strong></p>
+</blockquote>
+<p>最后虽然出现了这样的警告，但是不影响正常的使用</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="function">WARNING: <span class="title">The</span> <span class="title">nvidia</span>-<span class="title">drm</span> <span class="title">module</span> <span class="title">will</span> <span class="title">not</span> <span class="title">be</span> <span class="title">installed</span>. <span class="title">As</span> <span class="title">a</span> <span class="title">result</span>, <span class="title">DRM</span>-<span class="title">KMS</span> <span class="title">will</span> <span class="title">not</span></span></span><br><span class="line"><span class="function">         <span class="title">function</span> <span class="title">with</span> <span class="title">this</span> <span class="title">installation</span> <span class="title">of</span> <span class="title">the</span> <span class="title">NVIDIA</span> <span class="title">driver</span>.</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">WARNING</span>: <span class="title">nvidia</span>-<span class="title">installer</span> <span class="title">was</span> <span class="title">forced</span> <span class="title">to</span> <span class="title">guess</span> <span class="title">the</span> <span class="title">X</span> <span class="title">library</span> <span class="title">path</span> &#x27;/<span class="title">usr</span>/<span class="title">lib64</span>&#x27; <span class="title">and</span> <span class="title">X</span></span></span><br><span class="line"><span class="function">         <span class="title">module</span> <span class="title">path</span> &#x27;/<span class="title">usr</span>/<span class="title">lib64</span>/<span class="title">xorg</span>/<span class="title">modules</span>&#x27;; <span class="title">these</span> <span class="title">paths</span> <span class="title">were</span> <span class="title">not</span> <span class="title">queryable</span> <span class="title">from</span> <span class="title">the</span></span></span><br><span class="line"><span class="function">         <span class="title">system</span>.  <span class="title">If</span> <span class="title">X</span> <span class="title">fails</span> <span class="title">to</span> <span class="title">find</span> <span class="title">the</span> <span class="title">NVIDIA</span> <span class="title">X</span> <span class="title">driver</span> <span class="title">module</span>, <span class="title">please</span> <span class="title">install</span> <span class="title">the</span></span></span><br><span class="line"><span class="function">         `<span class="title">pkg</span>-<span class="title">config</span>` <span class="title">utility</span> <span class="title">and</span> <span class="title">the</span> <span class="title">X.Org</span> <span class="title">SDK</span>/<span class="title">development</span> <span class="title">package</span> <span class="title">for</span> <span class="title">your</span> <span class="title">distribution</span></span></span><br><span class="line"><span class="function">         <span class="title">and</span> <span class="title">reinstall</span> <span class="title">the</span> <span class="title">driver</span>.</span></span><br></pre></td></tr></table></figure>
+<p>使用<code>nvidia-smi</code>也可以正常的显示，如图：</p>
+<p><img src="nvidia.png" alt="nvidia-smi"></p>
+<p>随后就可以正常的开展自己的任务了。</p>
+<h2 id="本地连接">本地连接</h2>
+<p>web连接虽然很方便，但是因为我习惯使用<code>vscode</code>作为编辑器，并且在<code>tmux</code>中运行程序，所以，我需要把vm和本机🔗起来。而这也不难实现，只要建立好<strong>ssh密钥-公钥</strong>就好。</p>
+<h3 id="本地生成ssh密钥-公钥">本地生成ssh密钥-公钥</h3>
+<p>进入<code>Terminal</code>，在windows上就是<code>windows powershell</code>，输入<code>cd ~/.ssh</code>进入了<code>.ssh</code>文件夹中。</p>
+<p>然后输入<code>ssh-keygen -t rsa -f ~/.ssh/gcp_test -C [user_name]</code>，这里的<code>user_name</code>就是你的gcp的用户名，也就是从web登录后的<code>xxx@mmm</code>中的<code>xxx</code>；随后会要求你输入一个保存的文件名，不妨设置为<code>gcp_test</code>。</p>
+<p>随后，设置<code>.ssh</code>中的<code>config</code>文件以方便使用ssh来连接vm:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host gcp-test</span><br><span class="line">  HostName xx.xxx.xxx.xxx   # vm的外部ip地址，每次开机都会发生改变</span><br><span class="line">  User user_name # vm上的用户名</span><br><span class="line">  IdentityFile ~/.ssh/gcp_test  # 私钥的保存路径</span><br><span class="line">  LocalForward 6006 localhost:6006  # 本地的映射接口</span><br></pre></td></tr></table></figure>
+<h3 id="远程设置公钥">远程设置公钥</h3>
+<p>然后输入<code>cat gcp_test.pub</code>来显示公钥，然后复制公钥。进入<strong>元数据</strong>，点击<em>SSH密钥</em>、<em>修改</em>，如图所示：</p>
+<p><img src="madata.png" alt="ma data"></p>
+<p>把自己的公钥复制其中。</p>
+<p>或者，通过web设置公钥：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/.ssh</span><br><span class="line">nano authorized_keys</span><br><span class="line"># 然后就是把公钥复制其中</span><br><span class="line"># ctrl+O 保存</span><br><span class="line"># enter 确认</span><br><span class="line"># ctrl+x 退出</span><br></pre></td></tr></table></figure>
+<p>然后输入命令<code>ssh gcp-test</code>，连接到vm</p>
+<h2 id="连接到GitHub">连接到GitHub</h2>
+<p>为了工作方便，我需要使用GitHub+git来同步。</p>
+<h3 id="在vm中建立ssh">在vm中建立ssh</h3>
+<p>为了连接GitHub，我需要在vm中建立一个ssh私钥-公钥对：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t rsa -b <span class="number">4096</span> -C &quot;your github email&quot;</span><br></pre></td></tr></table></figure>
+<p>我是直接全部<code>enter</code>也就是使用默认的文件路径并且不设置密码。</p>
+<h3 id="公钥部署到GitHub">公钥部署到GitHub</h3>
+<p>然后，使用<code>cat id_rsa.pub</code>，显示了对应的公钥；进入GitHub中的<a href="https://github.com/settings/ssh/new">ssh页面</a>。把刚才复制的内容粘贴进去，并且起一个名字就好。</p>
+<p>随后使用<code>ssh -T git@github.com</code>确认是不是成功连接到GitHub。</p>
+<blockquote>
+<p>如此一来就实现了在本地对vm的连接并且连接vm到GitHub上</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>机器学习</category>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>Git</tag>
+        <tag>Deep Learning</tag>
+        <tag>Virtual Machine</tag>
+        <tag>ssh</tag>
+        <tag>GitHub</tag>
       </tags>
   </entry>
 </search>

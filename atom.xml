@@ -6,17 +6,46 @@
   <link href="https://a-green-hand-jack.github.io/blog/atom.xml" rel="self"/>
   
   <link href="https://a-green-hand-jack.github.io/blog/"/>
-  <updated>2024-05-22T11:29:02.946Z</updated>
+  <updated>2024-05-25T06:06:09.931Z</updated>
   <id>https://a-green-hand-jack.github.io/blog/</id>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>在GCP上建立虚拟机实例</title>
+    <link href="https://a-green-hand-jack.github.io/blog/2024/05/25/%E5%9C%A8GCP%E4%B8%8A%E5%BB%BA%E7%AB%8B%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AE%9E%E4%BE%8B/"/>
+    <id>https://a-green-hand-jack.github.io/blog/2024/05/25/%E5%9C%A8GCP%E4%B8%8A%E5%BB%BA%E7%AB%8B%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AE%9E%E4%BE%8B/</id>
+    <published>2024-05-25T04:09:58.000Z</published>
+    <updated>2024-05-25T06:06:09.931Z</updated>
+    
+    
+    <summary type="html">最近一段时间在使用Google Cloud Platform (GCP)，顺便总结一下如何使用。</summary>
+    
+    
+    
+    <category term="机器学习" scheme="https://a-green-hand-jack.github.io/blog/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="工具" scheme="https://a-green-hand-jack.github.io/blog/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%B7%A5%E5%85%B7/"/>
+    
+    
+    <category term="Git" scheme="https://a-green-hand-jack.github.io/blog/tags/Git/"/>
+    
+    <category term="Deep Learning" scheme="https://a-green-hand-jack.github.io/blog/tags/Deep-Learning/"/>
+    
+    <category term="Virtual Machine" scheme="https://a-green-hand-jack.github.io/blog/tags/Virtual-Machine/"/>
+    
+    <category term="ssh" scheme="https://a-green-hand-jack.github.io/blog/tags/ssh/"/>
+    
+    <category term="GitHub" scheme="https://a-green-hand-jack.github.io/blog/tags/GitHub/"/>
+    
+  </entry>
   
   <entry>
     <title>genePT</title>
     <link href="https://a-green-hand-jack.github.io/blog/2024/05/22/GenePT/"/>
     <id>https://a-green-hand-jack.github.io/blog/2024/05/22/GenePT/</id>
     <published>2024-05-22T11:10:56.000Z</published>
-    <updated>2024-05-22T11:29:02.946Z</updated>
+    <updated>2024-05-22T16:18:58.104Z</updated>
     
     
     <summary type="html">记录了GenePT中运用的任务、指标、数据集、基准</summary>
@@ -112,7 +141,7 @@
     <link href="https://a-green-hand-jack.github.io/blog/2023/09/21/Transformer%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/"/>
     <id>https://a-green-hand-jack.github.io/blog/2023/09/21/Transformer%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/</id>
     <published>2023-09-21T02:02:36.000Z</published>
-    <updated>2023-09-21T13:59:03.416Z</updated>
+    <updated>2024-05-22T11:36:28.368Z</updated>
     
     
     <summary type="html">在CS231n(2019)中,有一部分关于RNN的内容&lt;现在已经去除&gt;,我学的时候查阅其他资料,发现RNN能干的事情transformer似乎也能干而且更好.所以我干脆没有管 RNN那一部分的任务,而是花了一些时间仔细的学习了transformer,这里是我的学习记录</summary>
@@ -121,7 +150,7 @@
     
     <category term="机器学习" scheme="https://a-green-hand-jack.github.io/blog/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/"/>
     
-    <category term="CS231n-深度学习与计算机视觉-RNN" scheme="https://a-green-hand-jack.github.io/blog/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/CS231n-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B8%8E%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89-RNN/"/>
+    <category term="vision" scheme="https://a-green-hand-jack.github.io/blog/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/vision/"/>
     
     
     <category term="Machine Learning" scheme="https://a-green-hand-jack.github.io/blog/tags/Machine-Learning/"/>
