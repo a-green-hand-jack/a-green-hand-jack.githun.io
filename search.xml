@@ -1718,25 +1718,25 @@ GenePT在多数任务中展现出与现有模型相当的或更好的性能。</
 </blockquote>
 <h1>下载一些软件</h1>
 <p>在Linux中下载和安装<code>aria2c</code>、<code>wget</code>和<code>git-lfs</code>可以通过包管理器进行。以下是具体步骤：</p>
-<h3 id="安装aria2c">安装<code>aria2c</code></h3>
+<h2 id="安装aria2c">安装<code>aria2c</code></h2>
 <p><code>aria2c</code>是一个轻量级的多协议、多来源的命令行下载工具。</p>
-<h4 id="Debian-Ubuntu">Debian/Ubuntu</h4>
+<h3 id="Debian-Ubuntu">Debian/Ubuntu</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install aria2</span><br></pre></td></tr></table></figure>
-<h4 id="CentOS-RHEL">CentOS/RHEL</h4>
+<h3 id="CentOS-RHEL">CentOS/RHEL</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo yum install epel-release</span><br><span class="line">sudo yum install aria2</span><br></pre></td></tr></table></figure>
-<h4 id="Fedora">Fedora</h4>
+<h3 id="Fedora">Fedora</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo dnf install aria2</span><br></pre></td></tr></table></figure>
-<h3 id="安装wget">安装<code>wget</code></h3>
+<h2 id="安装wget">安装<code>wget</code></h2>
 <p><code>wget</code>是一个命令行下载工具，支持HTTP、HTTPS和FTP协议。</p>
-<h4 id="Debian-Ubuntu-2">Debian/Ubuntu</h4>
+<h3 id="Debian-Ubuntu-2">Debian/Ubuntu</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install wget</span><br></pre></td></tr></table></figure>
-<h4 id="CentOS-RHEL-2">CentOS/RHEL</h4>
+<h3 id="CentOS-RHEL-2">CentOS/RHEL</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo yum install wget</span><br></pre></td></tr></table></figure>
-<h4 id="Fedora-2">Fedora</h4>
+<h3 id="Fedora-2">Fedora</h3>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo dnf install wget</span><br></pre></td></tr></table></figure>
-<h3 id="安装git-lfs">安装<code>git-lfs</code></h3>
+<h2 id="安装git-lfs">安装<code>git-lfs</code></h2>
 <p><code>git-lfs</code>（Git Large File Storage）是Git的扩展，专门用于处理大文件。</p>
-<h4 id="Debian-Ubuntu-3">Debian/Ubuntu</h4>
+<h3 id="Debian-Ubuntu-3">Debian/Ubuntu</h3>
 <ol>
 <li>
 <p>安装必要的依赖：</p>
@@ -1747,7 +1747,7 @@ GenePT在多数任务中展现出与现有模型相当的或更好的性能。</
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash</span><br><span class="line">sudo apt-get install git-lfs</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
-<h4 id="CentOS-RHEL-3">CentOS/RHEL</h4>
+<h3 id="CentOS-RHEL-3">CentOS/RHEL</h3>
 <ol>
 <li>
 <p>安装必要的依赖：</p>
@@ -1758,16 +1758,16 @@ GenePT在多数任务中展现出与现有模型相当的或更好的性能。</
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | sudo bash</span><br><span class="line">sudo yum install git-lfs</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
-<h4 id="Fedora-3">Fedora</h4>
+<h3 id="Fedora-3">Fedora</h3>
 <ol>
 <li>添加Git LFS仓库并安装：<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.rpm.sh | sudo bash</span><br><span class="line">sudo dnf install git-lfs</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
-<h3 id="验证安装">验证安装</h3>
+<h2 id="验证安装">验证安装</h2>
 <p>安装完成后，你可以使用以下命令验证各个工具是否安装成功：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">aria2c --version</span><br><span class="line">wget --version</span><br><span class="line">git lfs --version</span><br></pre></td></tr></table></figure>
 <p>如果输出了相应的版本信息，则说明安装成功。</p>
-<h3 id="使用示例">使用示例</h3>
+<h2 id="使用示例">使用示例</h2>
 <ul>
 <li>
 <p><strong>aria2c</strong>:</p>
