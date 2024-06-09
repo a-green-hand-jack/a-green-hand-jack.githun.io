@@ -161,8 +161,8 @@ $$</p>
 </ul>
 ]]></content>
       <categories>
-        <category>机器学习</category>
-        <category>vision</category>
+        <category>深度学习</category>
+        <category>transformer</category>
       </categories>
       <tags>
         <tag>Machine Learning</tag>
@@ -1740,7 +1740,7 @@ GenePT在多数任务中展现出与现有模型相当的或更好的性能。</
 <ol>
 <li>
 <p>安装必要的依赖：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install software-properties-common</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install git-lfs</span><br></pre></td></tr></table></figure>
 </li>
 <li>
 <p>添加Git LFS仓库并安装：</p>
@@ -1794,6 +1794,71 @@ GenePT在多数任务中展现出与现有模型相当的或更好的性能。</
         <tag>Virtual Machine</tag>
         <tag>ssh</tag>
         <tag>GitHub</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>深度学习入门</title>
+    <url>/blog/2024/06/09/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%85%A5%E9%97%A8/</url>
+    <content><![CDATA[<h1>前言</h1>
+<h2 id="问题引入">问题引入</h2>
+<p>想想一下，你正在研究一款新药，不妨为它起一个名字就叫“新-二甲双胍”。在药物的研制过程中，你想研究一些药物的摄入量和其药效之间的关系；为了简单起见，你把药物的服用的质量-体重比（g/kg）作为其摄入量；把服药后1h的血糖（mmol/L）作为药效的衡量指标；并且认为0.45-0.50mmol/L属于正常范围。</p>
+<p>随后，你开展了一系列实验得到了下面这张图：</p>
+<p><img src="%E5%AE%9E%E9%AA%8C.svg" alt="实验结果"></p>
+<p>自然的，会希望使用某一种解析式来描述这个曲线；而且进一步的会希望使用最少的参数就能确定这个曲线。一个简单的想法是使用<strong>分段的线性拟合</strong>，其效果大约像这样：</p>
+<p><img src="%E5%88%86%E6%AE%B5%E7%BA%BF%E6%80%A7%E6%8B%9F%E5%90%88.png" alt="分段-线性拟合"></p>
+<p>很显然，这样的方法虽然使用的<strong>参数比较少</strong>，但是需要确定<strong>拐点</strong>，也就是实现不同线性函数之间的切换，这似乎不是一件容易的的事情。</p>
+<blockquote>
+<p>当然了，我们也可以使用伟大的<strong>多项式拟合</strong>但是这种方法其实也不是很好，如果有做过<em>大雾实验</em>就这知道这种方法比较容易过拟合，也就是在某些点总是得到不很好的拟合。如果在低维中就出现了这种问题，自然不能指望在高维中也有很好的效果。<br>
+这里仅仅是顺戈一击，不要太在意</p>
+</blockquote>
+<p>但是，如果有方法可以自动地帮助<strong>线性函数变弯</strong>；那么，使用线性函数的拟合，就是一个好主意了。幸运的是，这不是什么困难的事情！</p>
+<h2 id="拟合曲线">拟合曲线</h2>
+<p>事实上，仅仅需要一些简单的线性函数和非线性函数，我们就可以很轻松的实现对这个曲线的拟合，如下图所示：</p>
+<p><img src="%E5%88%86%E6%AD%A5%E8%A7%A3%E9%87%8A.png" alt="alt text"></p>
+<p>这里的蓝色和红色分布表示一个线性变化和一个非线性变化，我们是通过对应的线性函数和非线性函数实现的这种变化；特别的是，这里使用的非线性函数是一个<strong>sigmoid</strong>函数。这里我没有标注每一个线性变化中的参数，因为具体的参数是什么在这里并不重要，我们只要能从图中的纵坐标的变化上是可以看出对应的线性变化的发生就可以了。</p>
+<p>需要指出的是，这里的sigmoid函数的形式是：$\sigma(x) = \frac{1}{1 + \mathrm{e}^{-x}}$，也就是说，它的参数都是固定的、已知的。而线性函数:$y = \mathrm{w} \cdot x + \mathrm{b}$中的$\mathrm{w}$和$\mathrm{b}$则是不知道的，是需要确定的。</p>
+<p>这里，我们先不考虑这里的$\mathrm{w}$和$\mathrm{b}$是怎么确定的，而是深入的考察一下上图到底在干啥，这样的一个拟合的过程要怎么理解。</p>
+<h1>抽象化</h1>
+<blockquote>
+<p>这里是为了后面讨论的方法，主要是为了引入<strong>张量</strong>这件事</p>
+</blockquote>
+<h2 id="神经网络与曲线拟合">神经网络与曲线拟合</h2>
+<p>正如我们上文讨论的那样，对一个曲线的拟合事实上可以通过一些线性运算和非线性运算的叠加。而神经网络中所发生的就是这样的运算，如下图所示：</p>
+<blockquote>
+<p>这里是强调<strong>forward</strong>中发生的事情，<strong>backward</strong>先不着急 ＞︿＜</p>
+</blockquote>
+<p><img src="%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E6%9B%B2%E7%BA%BF%E6%8B%9F%E5%90%88.png" alt="神经网络与曲线拟合"></p>
+<p>这里给出了一个简单的神经网络<strong>SimpleMLP</strong>，其内部结构事实上就是两个线性层，<code>fc1</code>和<code>fc2</code>，两个非线层，<code>sigmoid1</code>和<code>sigmoid2</code>，一起形成的。输入的数据会依次经过：<code>fc1</code>&gt;<code>sigmoid1</code>&gt;<code>fc2</code>&gt;<code>sigmoid2</code>，得到最后的输出。</p>
+<p>这里，我们不妨先把这个<code>fc1</code>&gt;<code>sigmoid1</code>&gt;<code>fc2</code>&gt;<code>sigmoid2</code>的过程视作“某种变化”，也就是“一个黑箱”，我们只要输入一系列的数据，就能得到一系列的输出，而得到的输出正好和现实中的结果对的上号！如下图所示：</p>
+<p><img src="%E8%BE%93%E5%85%A5%E4%B8%8E%E8%BE%93%E5%87%BA.png" alt="输入与输出"></p>
+<blockquote>
+<p>这里仅仅是用作示意，不要真的去观察箭头和数字是不是对的上哦🤣</p>
+</blockquote>
+<p>所以，我们到这里就知道了，我们事实上可以把一个神经网络看作一系列线性函数和非线性函数逐次作用的结果。但是，总是使用这样的语言来描述一个神经网络总是不方法的，特别是，在研究网络优化和复杂网络上。所以下面我们希望引入一种更加抽象、通用的方法来描述其中发生的事情。</p>
+<h2 id="神经网络与张量">神经网络与张量</h2>
+<blockquote>
+<p>标量是零维的张量、向量/矢量是一维的张量、矩阵是二维的张量；这里指出，是希望下文不会引发什么歧义</p>
+</blockquote>
+<p>线性代数教会我们的一个重要的事情就是：<strong>一个线性变化，可以用一个矩阵运算来表示</strong>，我们在学习的过程中经常干的一件事情就是用输入的向量和输出的向量来确定中间的转化矩阵。那么，如果我们先忽略神经网络中的那些非线性的部分，我们就会意识到，它们是一回事情。也就是说，我们可以用张量之间的运算代替神经网络中的线性部分的运算。</p>
+<blockquote>
+<p>这里使用张量，是因为虽然我们学习线性代数时候总是见到向量和矩阵上的运算，但是现实中的数据总是高维的，比如图片，不用张量就难以描述。而且张量的运算的规律和它们是一样的。</p>
+</blockquote>
+<p>那么非线性的部分要怎么解决呢？其实也很简单，我们使用逐元素的运算就可以了，所以，非线性运算就是对张量进行逐元素的运算；特别的，这里的元素应该是一个单射，也就是一个输入只能有一个唯一的输出。</p>
+<p>希望下面这张图可以帮助你理解这个过程：</p>
+<p><img src="%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%8E%E5%BC%A0%E9%87%8F.png" alt="神经网络与张量"></p>
+<p>这里，我们把原本的线性运算使用张量之间的点乘代替；把原本的非线性运算用对张量的逐元素运算代替。解释了如何从输入$\mathbf{\vec{x^0}} \in \mathbb{R}^n$得到对应的预测$\mathbf{\vec{y^0}} \in \mathbb{R}^m$</p>
+<p>值得注意的是，对一个神经网络可以有多个输入以及多个输出，而每一个输入或者输出可以是高维的信息（这往往意味着一个很长的向量）。</p>
+<h1>小结</h1>
+<p>综上所述，我们知道了神经网络在一定程度上和曲线拟合是一回事情；并且为了更好的描述其中的过程，也是为了应对高维和复杂网络的挑战，我们使用张量的语言来描述神经网络中的运算。</p>
+<p>但是，我们还没有解释神经网络中的那些未知的线性运算的参数，也就是那些张量$\mathbf{W}$和$\mathbf{b}$是怎么确定的。因为它们显然是经过仔细选择的，不然的话，预测得到的曲线怎么会和真实的曲线一致。</p>
+]]></content>
+      <categories>
+        <category>深度学习</category>
+        <category>入门</category>
+      </categories>
+      <tags>
+        <tag>Machine Learning</tag>
+        <tag>Deep Learning</tag>
       </tags>
   </entry>
 </search>
