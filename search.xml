@@ -2017,9 +2017,12 @@ $$</p>
 <p>这里的$\mu$是学习率，也就是一次优化参数变化的步长。</p>
 </blockquote>
 <p>为了直观的说明如何通过梯度下降的方法从初始化的$\theta_{init}$得到期待的$\hat \theta$，我们这里不妨先考虑一个“理想模型”，这里模型中只有两个参数$\theta_1$和$\theta_2$，对应的$loss$就是一个二元函数，如下图：</p>
-<p><img src="%E6%A2%AF%E5%BA%A6-%E5%8F%82%E6%95%B0%E4%BC%98%E5%8C%96.gif" alt="梯度优化"></p>
+<p><img src="loss.png" alt="loss"></p>
+<p>显然,这里的$loss$就是完全由参数$\theta_1$和$\theta_2$决定的.</p>
 <p>这里给出了几种不同的梯度优化的方法，但是我们可以先不考虑它们具体是怎么操作的，知道它们都是依赖于$\nabla loss(\theta)$就可以了。</p>
+<p><img src="%E6%A2%AF%E5%BA%A6-%E5%8F%82%E6%95%B0%E4%BC%98%E5%8C%96.gif" alt="梯度优化"></p>
 <h2 id="链式法则">链式法则</h2>
+<p><img src="cover.png" alt="链式法则"></p>
 <p>上文中，我们说明了，实现参数优化的方法是梯度优化，而梯度优化中必不可少的操作就是计算函数的梯度也就是$\nabla loss(\theta)$。</p>
 <p>但是，这样的计算并不是一件容易的事情，在多层感知器（MLP）中，损失函数通常在输出层计算，然后通过反向传播算法将误差逐层传递回去。假设我们有一个三层的MLP，损失函数 $ L $ 通常是输出层的预测值 $ \hat{y} $ 与真实值 $ y $ 之间的差异。损失函数的一个常见形式是均方误差（MSE）：</p>
 <p>$ L = \frac{1}{2}(\hat{y} - y)^2 $</p>
@@ -2027,14 +2030,14 @@ $$</p>
 <p>$ \frac{\partial L}{\partial w^{(1)}} = \frac{\partial L}{\partial z^{(2)}} \cdot \frac{\partial z^{(2)}}{\partial a^{(2)}} \cdot \frac{\partial a^{(2)}}{\partial z^{(1)}} \cdot \frac{\partial z^{(1)}}{\partial w^{(1)}} $<br>
 $ \frac{\partial L}{\partial b^{(1)}} = \frac{\partial L}{\partial z^{(2)}} \cdot \frac{\partial z^{(2)}}{\partial a^{(2)}} \cdot \frac{\partial a^{(2)}}{\partial z^{(1)}} \cdot \frac{\partial z^{(1)}}{\partial b^{(1)}} $</p>
 <p>其中：</p>
-<ul>
+<ol>
 <li>$ z^{(1)} = w^{(1)} \cdot x + b^{(1)} $ 是第一层的输入加权和加上偏置。</li>
 <li>$ a^{(1)} = \sigma(z^{(1)}) $ 是第一层的激活函数输出。</li>
 <li>$ z^{(2)} = w^{(2)} \cdot a^{(1)} + b^{(2)} $ 是第二层的输入。</li>
 <li>$ a^{(2)} = \sigma(z^{(2)}) $ 是第二层的激活函数输出。</li>
 <li>$ \hat{y} = w^{(3)} \cdot a^{(2)} + b^{(3)} $ 是最终的预测值。</li>
 <li>$ \sigma $ 是激活函数，比如 sigmoid 或 ReLU。</li>
-</ul>
+</ol>
 <blockquote>
 <p>pytorch是现在最流行的DL的框架，在pytorch中，$\nabla loss(\theta^i_t)$也即是某一个时间步中的某一个参数的梯度就是通过这样的反向传播的方法计算得到的，并且以$(\theta_t^i, \nabla loss(\theta^i_t))$的形式加以保持，这样会增加显存的开销，但是可以减少计算的时间。</p>
 </blockquote>
