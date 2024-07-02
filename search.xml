@@ -580,13 +580,18 @@ $$</p>
   <entry>
     <title>LLM与BioSequence</title>
     <url>/blog/2024/05/22/LLM%E4%B8%8EBioSequence/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>随着各种测序技术的发展，伴随着全球各地的研究人员的头发的牺牲，人类的知识库中多出了很多有关基因组、转录组、蛋白组的数据。但是如何合理的运用这些来之不易的数据却成了一个大问题，在过去的很长一段时间中，生物信息学的进步弥补这其中的缺陷。然而，这些方法往往涉及到一个问题“不够通用”，也就说，某一种方法只能在一类任务或数据集上使用。同时，注意力机制在自然语言生成（natural language genertaion）上的成功引发了人们的关注：能不能像处理自然语言一样处理序列信息？</p>
+    <content><![CDATA[<h1>前言</h1>
+<p>随着各种测序技术的发展，伴随着全球各地的研究人员的头发的牺牲，人类的知识库中多出了很多有关基因组、转录组、蛋白组的数据。但是如何合理的运用这些来之不易的数据却成了一个大问题，在过去的很长一段时间中，生物信息学的进步弥补这其中的缺陷。然而，这些方法往往涉及到一个问题“不够通用”，也就说，某一种方法只能在一类任务或数据集上使用。同时，注意力机制在自然语言生成（natural language genertaion）上的成功引发了人们的关注：能不能像处理自然语言一样处理序列信息？</p>
 <p>在这样的想法的驱动下以及产生了很多优秀的工作，这里，笔者关注了<code>Geneformer</code>、<code>GenePT</code>、<code>scGPT</code>这3项工作。并在这里总结它们设计的用于评估模型表现力的下游任务以及这些任务对应的指标。</p>
-<h1 id="GenePT"><a href="#GenePT" class="headerlink" title="GenePT"></a>GenePT</h1><!-- 整体上是在基因和细胞两个水平考察了模型嵌入是否反应了真实的生物学意义，并且力求在保留生物学意义的同时减小批次和组织特异性；在这样的思路的指导下根据合适的数据集设计了相关的下游任务。 -->
+<h1>GenePT</h1>
+<!-- 整体上是在基因和细胞两个水平考察了模型嵌入是否反应了真实的生物学意义，并且力求在保留生物学意义的同时减小批次和组织特异性；在这样的思路的指导下根据合适的数据集设计了相关的下游任务。 -->
 <p>使用 GPT-3.5 的单个基因的 NCBI 文本描述来生成基因嵌入；通过两种方式生成单细胞嵌入：（i）通过对基因嵌入进行平均，并根据每个基因的表达水平进行加权；（ii）通过使用按表达水平排序的基因名称为每个细胞创建一个句子嵌入；随后利用这些嵌入执行下游任务（如对基因属性和细胞类型的分类）。 GenePT 证明基于文献的大语言模型嵌入是获得生物基础模型的简单而有效的途径。</p>
-<h2 id="两种水平的任务"><a href="#两种水平的任务" class="headerlink" title="两种水平的任务"></a>两种水平的任务</h2><h3 id="基因水平的任务"><a href="#基因水平的任务" class="headerlink" title="基因水平的任务"></a>基因水平的任务</h3><ol>
+<h2 id="两种水平的任务">两种水平的任务</h2>
+<h3 id="基因水平的任务">基因水平的任务</h3>
+<ol>
 <li>基因功能类别预测：这是一个多分类预测跳转基于15个最常见的功能基因类别。这些类别的标签是作为<code>Geneformer</code>这个文章的一部分策划的。</li>
-<li>基因属性预测任务：这包括4个二元分类任务，这些任务基于Theodoeis 等人提供的开源数据：<ol>
+<li>基因属性预测任务：这包括4个二元分类任务，这些任务基于Theodoeis 等人提供的开源数据：
+<ol>
 <li>区分先前确定的<em>剂量敏感转录因子</em>和 <em>剂量不敏感转录因子</em></li>
 <li>区分二价基因和非甲基化基因</li>
 <li>区分仅Lsy4甲基化和非甲基化基因</li>
@@ -594,8 +599,10 @@ $$</p>
 </ol>
 </li>
 <li>基因-基因相关作用预测：理由Du等人开发并共享的基因-基因相互作用（GGI）基准。训练和测试数据集包括了200000对样本<code>（gene1,gene2,label）</code>，这里的<code>label</code>标记这一对基因是不是相互作用</li>
-<li>蛋白质-蛋白质<code>（PPI）</code>相关作用：<ol>
-<li>使用了3个数据集<ol>
+<li>蛋白质-蛋白质<code>（PPI）</code>相关作用：
+<ol>
+<li>使用了3个数据集
+<ol>
 <li><code>The human binary protein interactions (HuRI) dataset</code></li>
 <li><code>comprehensive binary protein-protein interactions (Lit-BM)</code></li>
 <li><code>tissue-specific protein-protein functional interaction networks</code></li>
@@ -606,70 +613,92 @@ $$</p>
 <li>首先使用UniProt 转化工具把蛋白质的蛋白质组标志转化为基因名称；如果返回了多个基因名称，就随机选择一个</li>
 </ol>
 </li>
-<li>基因程序的无监督探索<ol>
+<li>基因程序的无监督探索
+<ol>
 <li>检查基因之间的相互作用，使用来自<em>人类免疫组织数据集</em>的<code>GenePt</code>嵌入构建了一个基因-基因相互作用的相似性网络</li>
 <li>基于高变基因之间的余弦相似度构建基因网络</li>
 <li>应用Louvain 聚类来推到基因程序</li>
 </ol>
 </li>
-<li>定性的比较<em>突出的基因程序的趋势</em>与它们<em>对应的细胞特异性表达水平</em> </li>
+<li>定性的比较<em>突出的基因程序的趋势</em>与它们<em>对应的细胞特异性表达水平</em></li>
 </ol>
-<h3 id="细胞水平的任务"><a href="#细胞水平的任务" class="headerlink" title="细胞水平的任务"></a>细胞水平的任务</h3><ol>
-<li><p>评估嵌入和底层细胞状态之间的关联：</p>
+<h3 id="细胞水平的任务">细胞水平的任务</h3>
 <ol>
-<li>主动脉：包括11种细胞类型，最初由Li等人研究并发表的一个随机20%的数据子集</li>
-<li>动脉：包含10种细胞类型</li>
-<li>骨组织：<ol>
+<li>评估嵌入和底层细胞状态之间的关联：
+<ol>
+<li>
+<p>主动脉：包括11种细胞类型，最初由Li等人研究并发表的一个随机20%的数据子集</p>
+</li>
+<li>
+<p>动脉：包含10种细胞类型</p>
+</li>
+<li>
+<p>骨组织：</p>
+<ol>
 <li>骨骼：包含7种细胞类型</li>
 <li>骨髓：包含3种已注释的癌症类型和11种细胞类型，总共13,468个细胞</li>
 </ol>
 </li>
-<li>胰腺：包含4,218个细胞中注释的11种细胞类型</li>
-<li><p>免疫细胞：从健康个体和多发性硬化症患者中收集，总共3,430个细胞中注释了18种细胞类型，来自12个供体。</p>
-<ol>
-<li><p>对于每个数据集及其关联的元数据注释，在预训练的 GenePT、Geneformer 或 scGPT 嵌入上应用 k 均值聚类，以获得与元数据注释中的类匹配的集群。</p>
+<li>
+<p>胰腺：包含4,218个细胞中注释的11种细胞类型</p>
 </li>
-<li><p>选择簇的数量 k 以匹配元数据注释中的类数量。</p>
+<li>
+<p>免疫细胞：从健康个体和多发性硬化症患者中收集，总共3,430个细胞中注释了18种细胞类型，来自12个供体。</p>
+</li>
+<li>
+<p>对于每个数据集及其关联的元数据注释，在预训练的 GenePT、Geneformer 或 scGPT 嵌入上应用 k 均值聚类，以获得与元数据注释中的类匹配的集群。</p>
+</li>
+<li>
+<p>选择簇的数量 k 以匹配元数据注释中的类数量。</p>
 <ol>
 <li>计算<strong>调整兰德指数 (ARI) 和调整互信息 (AMI)</strong>，以评估派生簇标签与真实元数据标签之间的一致性。</li>
 <li>推断标签和实际标签之间的较高对齐度（由<em>较高</em>的 ARI 或 AMI 值表示）表明嵌入捕获了更多的生物结构和信号。</li>
 </ol>
 </li>
-<li><p>使用原始样本的真实注释计算了<strong>平均轮廓宽度（ASW）</strong>，以评估簇的凝聚力和分离度。</p>
+<li>
+<p>使用原始样本的真实注释计算了<strong>平均轮廓宽度（ASW）</strong>，以评估簇的凝聚力和分离度。</p>
 </li>
 </ol>
 </li>
-</ol>
-</li>
-<li>上下文感知和批量集成：<ol>
+<li>上下文感知和批量集成：
+<ol>
 <li>评估 GenePT-s 嵌入是否受到常见批次效应的影响</li>
 <li>Aorta 数据集</li>
 <li>肌细胞数据集</li>
 </ol>
 </li>
 </ol>
-<h2 id="不同任务的结果"><a href="#不同任务的结果" class="headerlink" title="不同任务的结果"></a>不同任务的结果</h2><blockquote>
+<h2 id="不同任务的结果">不同任务的结果</h2>
+<blockquote>
 <p>说明结果的时候似乎不可避免的会提到指标，所以干脆在这里就一起说了吧。。。</p>
 </blockquote>
-<h3 id="基因功能类别判断"><a href="#基因功能类别判断" class="headerlink" title="基因功能类别判断"></a>基因功能类别判断</h3><ol>
-<li><p>二维 UMAP 对GenePT 嵌入</p>
+<h3 id="基因功能类别判断">基因功能类别判断</h3>
 <ol>
-<li><p>34000个基因</p>
+<li>
+<p>二维 UMAP 对GenePT 嵌入</p>
+<ol>
+<li>
+<p>34000个基因</p>
 </li>
-<li><p>15个分类</p>
+<li>
+<p>15个分类</p>
 </li>
 </ol>
 </li>
 </ol>
 <p><img src="UMAP.png" alt="UMAP"></p>
+<ol start="2">
+<li>
+<p>$l_2$ 正则化逻辑回归 ($l_{2}$ regularized logistic refression)</p>
 <ol>
-<li><p>$l<em>2$ 正则化逻辑回归 ($l</em>{2}$ regularized logistic refression)</p>
-<ol>
-<li><p>训练集和测试集分配是7：3</p>
+<li>
+<p>训练集和测试集分配是7：3</p>
 </li>
-<li><p>有15类不同的基因</p>
+<li>
+<p>有15类不同的基因</p>
 </li>
-<li><p><code>class-specific accuracies</code></p>
+<li>
+<p><code>class-specific accuracies</code></p>
 </li>
 </ol>
 </li>
@@ -678,106 +707,139 @@ $$</p>
 <blockquote>
 <p>也就是一个混淆矩阵</p>
 </blockquote>
-<h3 id="基因-基因相互作用预测"><a href="#基因-基因相互作用预测" class="headerlink" title="基因-基因相互作用预测"></a>基因-基因相互作用预测</h3><ol>
-<li><p>比较了3种方法在<strong>GGI</strong>数据集上的<strong>ROC-AUC</strong></p>
+<h3 id="基因-基因相互作用预测">基因-基因相互作用预测</h3>
 <ol>
-<li><p>GenePT</p>
+<li>
+<p>比较了3种方法在<strong>GGI</strong>数据集上的<strong>ROC-AUC</strong></p>
+<ol>
+<li>
+<p>GenePT</p>
 </li>
-<li><p>Gene2Vec</p>
+<li>
+<p>Gene2Vec</p>
 </li>
-<li><p>Geneformer</p>
+<li>
+<p>Geneformer</p>
 </li>
-<li><p>scGPT</p>
+<li>
+<p>scGPT</p>
 </li>
-<li><p>Permuted</p>
+<li>
+<p>Permuted</p>
 </li>
 </ol>
 </li>
-<li><p>使用了$l_2-regularized logistic classifier$ 也就是 LR分类器</p>
+<li>
+<p>使用了$l_2-regularized logistic classifier$ 也就是 LR分类器</p>
 </li>
 </ol>
 <p><img src="gene-gene-inter.png" alt="gene-gene-inter"></p>
-<h3 id="蛋白-蛋白相互作用预测"><a href="#蛋白-蛋白相互作用预测" class="headerlink" title="蛋白-蛋白相互作用预测"></a>蛋白-蛋白相互作用预测</h3><ol>
+<h3 id="蛋白-蛋白相互作用预测">蛋白-蛋白相互作用预测</h3>
+<ol>
 <li>指标是ROC-AUC</li>
-<li>3种不同的模型<ol>
+<li>3种不同的模型
+<ol>
 <li>GenePT</li>
 <li>scGPT</li>
 <li>geneformer</li>
 </ol>
 </li>
-<li>3个数据集<ol>
+<li>3个数据集
+<ol>
 <li>HuRI</li>
 <li>L-it-BM</li>
 <li>heart tissue</li>
 </ol>
 </li>
 </ol>
-<h3 id="细胞类型特异性激活"><a href="#细胞类型特异性激活" class="headerlink" title="细胞类型特异性激活"></a>细胞类型特异性激活</h3><ol>
+<h3 id="细胞类型特异性激活">细胞类型特异性激活</h3>
+<ol>
 <li>通过“零样本”方法研究了人类免疫组织数据集中 GenePT 衍生基因程序中的细胞类型特异性激活</li>
 <li>根据GenePT embeddings之间的余弦相似度构建了相似度图</li>
 <li>如果两个基因相似度大于0.9就用一个边把两个基因连接起来</li>
 <li>使用20的分辨率对结果图进行Leiden 聚类</li>
 </ol>
-<p><img src="细胞类型特异性激活.png" alt="细胞类型特异性激活"></p>
-<h3 id="GenePT-嵌入预测染色质动力学和剂量敏感性"><a href="#GenePT-嵌入预测染色质动力学和剂量敏感性" class="headerlink" title="GenePT 嵌入预测染色质动力学和剂量敏感性"></a>GenePT 嵌入预测染色质动力学和剂量敏感性</h3><ol>
-<li>预测基因在网络动态中的作：<ol>
+<p><img src="%E7%BB%86%E8%83%9E%E7%B1%BB%E5%9E%8B%E7%89%B9%E5%BC%82%E6%80%A7%E6%BF%80%E6%B4%BB.png" alt="细胞类型特异性激活"></p>
+<h3 id="GenePT-嵌入预测染色质动力学和剂量敏感性">GenePT 嵌入预测染色质动力学和剂量敏感性</h3>
+<ol>
+<li>预测基因在网络动态中的作：
+<ol>
 <li>剂量敏感与剂量不敏感的转录因子</li>
 <li>二价基因与非甲基化基因</li>
 <li>仅 Lys4 甲基化与非甲基化基因</li>
 <li>长程转录因子与短程转录因子。</li>
 </ol>
 </li>
-<li>使用 scikit-learn<ol>
+<li>使用 scikit-learn
+<ol>
 <li>参数选择默认参数</li>
-<li>五倍交叉验证的 ROC-AUC </li>
+<li>五倍交叉验证的 ROC-AUC</li>
 <li>l2 惩罚逻辑回归 (LR) 或随机森林 (RF) 分类器来评估 GenePT 和 Gene2vec 嵌入的性能</li>
 </ol>
 </li>
 </ol>
-<p><img src="嵌入预测染色质动力学和剂量敏感性.png" alt="嵌入预测染色质动力学和剂量敏感性"></p>
-<h3 id="GenePT-学习了细胞生的生物学表征"><a href="#GenePT-学习了细胞生的生物学表征" class="headerlink" title="GenePT 学习了细胞生的生物学表征"></a>GenePT 学习了细胞生的生物学表征</h3><p>评估不同潜在细胞表示（通过llm嵌入得到）和生物注释（人类手工标记）之间的关联：</p>
+<p><img src="%E5%B5%8C%E5%85%A5%E9%A2%84%E6%B5%8B%E6%9F%93%E8%89%B2%E8%B4%A8%E5%8A%A8%E5%8A%9B%E5%AD%A6%E5%92%8C%E5%89%82%E9%87%8F%E6%95%8F%E6%84%9F%E6%80%A7.png" alt="嵌入预测染色质动力学和剂量敏感性"></p>
+<h3 id="GenePT-学习了细胞生的生物学表征">GenePT 学习了细胞生的生物学表征</h3>
+<p>评估不同潜在细胞表示（通过llm嵌入得到）和生物注释（人类手工标记）之间的关联：</p>
 <ol>
-<li><p>该分析涉及代表来自循环系统（主动脉和动脉）、骨组织（骨骼、骨髓）、胰腺的细胞以及从健康个体和多发性硬化症患者收集的免疫细胞的数据集。</p>
+<li>
+<p>该分析涉及代表来自循环系统（主动脉和动脉）、骨组织（骨骼、骨髓）、胰腺的细胞以及从健康个体和多发性硬化症患者收集的免疫细胞的数据集。</p>
 </li>
-<li><p>使用预训练的 Geneformer 和 scGPT 嵌入来完成此任务。</p>
+<li>
+<p>使用预训练的 Geneformer 和 scGPT 嵌入来完成此任务。</p>
 </li>
-<li><p>计算调整兰德指数 (ARI) 和调整互信息 (AMI)，</p>
+<li>
+<p>计算调整兰德指数 (ARI) 和调整互信息 (AMI)，</p>
 <ol>
-<li><p>以将 <strong>k 均值聚类得出的标签与原始样本的真实注释进行比较</strong>（值越高表示对齐效果越好）；</p>
+<li>
+<p>以将 <strong>k 均值聚类得出的标签与原始样本的真实注释进行比较</strong>（值越高表示对齐效果越好）；</p>
 </li>
-<li><p>使用原始样本的真实注释计算<strong>平均轮廓宽度（ASW）</strong>，以评估簇的凝聚力和分离度。</p>
+<li>
+<p>使用原始样本的真实注释计算<strong>平均轮廓宽度（ASW）</strong>，以评估簇的凝聚力和分离度。</p>
 </li>
 </ol>
 </li>
 </ol>
-<h3 id="GenePT-嵌入消除了批次效应"><a href="#GenePT-嵌入消除了批次效应" class="headerlink" title="GenePT 嵌入消除了批次效应"></a>GenePT 嵌入消除了批次效应</h3><p>评估 GenePT 嵌入对于批次相关的技术工件（例如患者变异性）是否稳健。</p>
+<h3 id="GenePT-嵌入消除了批次效应">GenePT 嵌入消除了批次效应</h3>
+<p>评估 GenePT 嵌入对于批次相关的技术工件（例如患者变异性）是否稳健。</p>
 <ol>
-<li><p>使用 Chaffin 等人的心肌细胞数据集中的 10% 随机样本，以及来自主动脉数据集的 20% 随机样本其中包含健康和扩张主动脉的细胞</p>
+<li>
+<p>使用 Chaffin 等人的心肌细胞数据集中的 10% 随机样本，以及来自主动脉数据集的 20% 随机样本其中包含健康和扩张主动脉的细胞</p>
 <ol>
-<li><p>将 GenePT 与预训练的 Geneformer 和 scGPT 的性能进行了比较。</p>
+<li>
+<p>将 GenePT 与预训练的 Geneformer 和 scGPT 的性能进行了比较。</p>
 </li>
-<li><p>这两个样本都用于证明 Geneformer 的实用性。</p>
+<li>
+<p>这两个样本都用于证明 Geneformer 的实用性。</p>
 </li>
 </ol>
 </li>
-<li><p>目的是区分不同的细胞类型</p>
+<li>
+<p>目的是区分不同的细胞类型</p>
 </li>
-<li><p>原始数据中细胞类型和患者的批次有强关联</p>
+<li>
+<p>原始数据中细胞类型和患者的批次有强关联</p>
 <ol>
-<li><p>也就是说细胞簇和患者簇之间的ARI很高</p>
+<li>
+<p>也就是说细胞簇和患者簇之间的ARI很高</p>
 </li>
-<li><p>这就说明批次效应强烈</p>
+<li>
+<p>这就说明批次效应强烈</p>
 </li>
-<li><p>但是不太希望嵌入器有这么高的批次效应</p>
+<li>
+<p>但是不太希望嵌入器有这么高的批次效应</p>
 </li>
 </ol>
 </li>
-<li><p>幸运的是，GenePT等的ARI都不是很高，说明批次效应不明显</p>
+<li>
+<p>幸运的是，GenePT等的ARI都不是很高，说明批次效应不明显</p>
 </li>
 </ol>
-<h2 id="小节"><a href="#小节" class="headerlink" title="小节"></a>小节</h2><p>可以看出，在基因任务上的一般思路是先用合适的LLM得到每一种基因的嵌入，也就是实现了从gene text/sequence到gene embedding 的转化。然后利用得到的gene embedding 执行下游任务如：聚类或者分类。这样一来，因为就可以使用聚类或者分类的结果和指标来表征LLM的嵌入效果的好坏。而常见的关于聚类和分类算法的指标有：</p>
+<h2 id="小节">小节</h2>
+<p>可以看出，在基因任务上的一般思路是先用合适的LLM得到每一种基因的嵌入，也就是实现了从gene text/sequence到gene embedding 的转化。然后利用得到的gene embedding 执行下游任务如：聚类或者分类。这样一来，因为就可以使用聚类或者分类的结果和指标来表征LLM的嵌入效果的好坏。而常见的关于聚类和分类算法的指标有：</p>
 <ol>
-<li>聚类指标：<ol>
+<li>聚类指标：
+<ol>
 <li>调整兰德指数（Adjusted Rand Index, ARI）：评估聚类结果与真实标签的匹配度，值越高表示对齐效果越好。</li>
 <li>调整互信息（Adjusted Mutual Information, AMI）：测量聚类结果与真实标签之间的互信息，值越高表示聚类结果越接近真实标签。</li>
 <li>轮廓系数（Silhouette Score）：用于衡量聚类的一致性，值越高表示聚类效果越好。</li>
@@ -785,7 +847,8 @@ $$</p>
 <li>这些指标可以用于将 k 均值聚类得出的标签与原始样本的真实注释进行比较，从而评估聚类的效果。</li>
 </ol>
 </li>
-<li>分类指标：<ol>
+<li>分类指标：
+<ol>
 <li>准确率（Accuracy）：分类正确的样本数占总样本数的比例。</li>
 <li>精确率（Precision）：预测为正类的样本中实际为正类的比例。</li>
 <li>召回率（Recall）：实际为正类的样本中被正确预测为正类的比例。</li>
@@ -798,48 +861,63 @@ $$</p>
 <blockquote>
 <p>混淆矩阵（Confusion Matrix）：一个矩阵表示实际类别与预测类别的对比情况，帮助识别模型在哪些类别上表现较好或较差。</p>
 </blockquote>
-<h1 id="scGPT"><a href="#scGPT" class="headerlink" title="scGPT"></a>scGPT</h1><p>语言和细胞生物学（其中文本由单词组成；类似地，细胞由基因定义）进行比较，探讨了基础模型在推进细胞生物学和基因研究方面的适用性。利用新兴的单细胞测序数据，构建了单细胞生物学的基础模型 scGPT，该模型基于跨超过 3300 万个细胞的存储库的生成预训练 Transformer。scGPT 有效地提炼了有关基因和细胞的关键生物学见解。通过进一步适应迁移学习，可以优化 scGPT，以在不同的下游应用程序中实现卓越的性能。这包括细胞类型注释、多批次集成、多组学集成、扰动响应预测和基因网络推理等任务。</p>
-<h2 id="预训练后的基因嵌入"><a href="#预训练后的基因嵌入" class="headerlink" title="预训练后的基因嵌入"></a>预训练后的基因嵌入</h2><p>预训练后，使用统一流形近似和投影（UMAP）可视化3300 万个细胞中 10% 的人类细胞上的 scGPT 细胞嵌入。局部区域和簇的细胞类型通过不同的颜色准确表示。考虑到数据集中包含 400 多项研究，这证明了预训练提取生物变异的卓越能力。</p>
-<h2 id="scGPT提高了细胞类型注释的精度"><a href="#scGPT提高了细胞类型注释的精度" class="headerlink" title="scGPT提高了细胞类型注释的精度"></a>scGPT提高了细胞类型注释的精度</h2><ol>
-<li>微调预训练的 scGPT 以进行细胞类型注释<ol>
+<h1>scGPT</h1>
+<p>语言和细胞生物学（其中文本由单词组成；类似地，细胞由基因定义）进行比较，探讨了基础模型在推进细胞生物学和基因研究方面的适用性。利用新兴的单细胞测序数据，构建了单细胞生物学的基础模型 scGPT，该模型基于跨超过 3300 万个细胞的存储库的生成预训练 Transformer。scGPT 有效地提炼了有关基因和细胞的关键生物学见解。通过进一步适应迁移学习，可以优化 scGPT，以在不同的下游应用程序中实现卓越的性能。这包括细胞类型注释、多批次集成、多组学集成、扰动响应预测和基因网络推理等任务。</p>
+<h2 id="预训练后的基因嵌入">预训练后的基因嵌入</h2>
+<p>预训练后，使用统一流形近似和投影（UMAP）可视化3300 万个细胞中 10% 的人类细胞上的 scGPT 细胞嵌入。局部区域和簇的细胞类型通过不同的颜色准确表示。考虑到数据集中包含 400 多项研究，这证明了预训练提取生物变异的卓越能力。</p>
+<h2 id="scGPT提高了细胞类型注释的精度">scGPT提高了细胞类型注释的精度</h2>
+<ol>
+<li>微调预训练的 scGPT 以进行细胞类型注释
+<ol>
 <li>神经网络分类器（network classifier）将 scGPT 变压器输出细胞嵌入作为输入并输出细胞类型的分类预测。</li>
 <li>整个模型在带有专家注释的参考数据集上使用交叉熵进行训练——微调</li>
 <li>然后用于预测保留的查询数据分区上的细胞类型——验证</li>
 </ol>
 </li>
-<li>对不同的数据集进行了广泛的实验，以评估 scGPT 在细胞类型注释方面的性能。<ol>
-<li>首先，用 scGPT 来预测人类胰腺数据集中的细胞类型，并考虑2个衡量指标<ol>
+<li>对不同的数据集进行了广泛的实验，以评估 scGPT 在细胞类型注释方面的性能。
+<ol>
+<li>首先，用 scGPT 来预测人类胰腺数据集中的细胞类型，并考虑2个衡量指标
+<ol>
 <li>预测</li>
 <li>混淆矩阵</li>
 <li>嵌入热图</li>
 </ol>
 </li>
-<li>接下来，在多发性硬化症 (MS) 疾病数据集上测试了该模型。<ol>
+<li>接下来，在多发性硬化症 (MS) 疾病数据集上测试了该模型。
+<ol>
 <li>该模型在健康人体免疫细胞的参考分区上进行了微调，并根据对 MS 状况细胞的预测进行了评估。</li>
 <li>同样考虑了混淆矩阵和热图作为衡量指标</li>
 </ol>
 </li>
-<li>最后，在三个数据集中对微调后的 scGPT 与另外两种最近基于 Transformer 的方法 TOSICA31 和 scBERT32 进行了基准测试。 <ol>
+<li>最后，在三个数据集中对微调后的 scGPT 与另外两种最近基于 Transformer 的方法 TOSICA31 和 scBERT32 进行了基准测试。
+<ol>
 <li>分类指标包括准确度、精确度、召回率和 F1</li>
 </ol>
 </li>
 </ol>
 </li>
 </ol>
-<h2 id="scGPT-预测不可见的遗传扰动反应"><a href="#scGPT-预测不可见的遗传扰动反应" class="headerlink" title="scGPT 预测不可见的遗传扰动反应"></a>scGPT 预测不可见的遗传扰动反应</h2><p>测序和基因编辑技术的最新进展极大地促进了大规模扰动实验，使得能够表征细胞对各种遗传扰动的反应。这种方法对于揭示新的基因相互作用和推进再生医学具有巨大的希望。然而，潜在基因扰动的巨大组合空间很快就超过了实验可行性的实际极限。为了克服这一限制，scGPT 可用于利用从已知实验中的细胞反应中获得的知识，并推断它们以预测未知的反应。在基因维度上利用自注意力机制可以对受干扰的基因与其他基因的响应之间复杂的相互作用进行编码。通过利用这种能力，scGPT 可以有效地从现有的实验数据中学习，并准确预测看不见的扰动的基因表达反应。</p>
-<h3 id="预测不可见基因扰动"><a href="#预测不可见基因扰动" class="headerlink" title="预测不可见基因扰动"></a>预测不可见基因扰动</h3><ul>
-<li><p><strong>扰动预测任务评估</strong></p>
+<h2 id="scGPT-预测不可见的遗传扰动反应">scGPT 预测不可见的遗传扰动反应</h2>
+<p>测序和基因编辑技术的最新进展极大地促进了大规模扰动实验，使得能够表征细胞对各种遗传扰动的反应。这种方法对于揭示新的基因相互作用和推进再生医学具有巨大的希望。然而，潜在基因扰动的巨大组合空间很快就超过了实验可行性的实际极限。为了克服这一限制，scGPT 可用于利用从已知实验中的细胞反应中获得的知识，并推断它们以预测未知的反应。在基因维度上利用自注意力机制可以对受干扰的基因与其他基因的响应之间复杂的相互作用进行编码。通过利用这种能力，scGPT 可以有效地从现有的实验数据中学习，并准确预测看不见的扰动的基因表达反应。</p>
+<h3 id="预测不可见基因扰动">预测不可见基因扰动</h3>
 <ul>
-<li>使用白血病细胞系的三个 Perturb-seq 数据集评估了scGPT：<ol>
-<li><strong>Adamson 数据集</strong><ul>
+<li>
+<p><strong>扰动预测任务评估</strong></p>
+<ul>
+<li>使用白血病细胞系的三个 Perturb-seq 数据集评估了scGPT：
+<ol>
+<li><strong>Adamson 数据集</strong>
+<ul>
 <li>包含 87 个单基因扰动</li>
 </ul>
 </li>
-<li><strong>精选的 Replogle 数据集</strong><ul>
+<li><strong>精选的 Replogle 数据集</strong>
+<ul>
 <li>包含 1,823 个单基因扰动</li>
 </ul>
 </li>
-<li><strong>Norman 数据集</strong><ul>
+<li><strong>Norman 数据集</strong>
+<ul>
 <li>包含 131 个单基因扰动</li>
 <li>包含 105 个单基因扰动和两基因扰动</li>
 </ul>
@@ -848,70 +926,84 @@ $$</p>
 </li>
 </ul>
 </li>
-<li><p><strong>评估方法</strong></p>
+<li>
+<p><strong>评估方法</strong></p>
 <ul>
 <li>为了评估 scGPT 的扰动预测能力，对扰动子集的模型进行了微调，以在给定输入控制细胞状态和干预基因的情况下预测扰动的表达谱。</li>
 <li>接下来，模型对涉及看不见的基因的扰动进行了测试。</li>
 </ul>
 </li>
-<li><p><strong>评估指标</strong></p>
+<li>
+<p><strong>评估指标</strong></p>
 <ul>
-<li><strong>Pearsondelta 指标</strong><ul>
+<li><strong>Pearsondelta 指标</strong>
+<ul>
 <li>衡量预测和观察到的扰动后表达变化之间的相关性。</li>
 </ul>
 </li>
-<li><strong>前 20 个变化最显著基因的指标</strong><ul>
+<li><strong>前 20 个变化最显著基因的指标</strong>
+<ul>
 <li>在差异表达基因上表示为 $Pearson_{\delta}$。</li>
 </ul>
 </li>
 </ul>
 </li>
-<li><p><strong>结果</strong></p>
+<li>
+<p><strong>结果</strong></p>
 <ul>
 <li>使用原始研究的注释，发现相同功能组的扰动条件聚集在邻近区域</li>
 <li>使用 Leiden 对预测的表达进行聚类，观察到这些聚类与扰动组合中的“显性基因”表现出高度关联。</li>
 </ul>
 </li>
-<li><p><strong>示例</strong></p>
+<li>
+<p><strong>示例</strong></p>
 <ul>
-<li><strong>KLF1 基因相关的圆圈簇</strong><ul>
+<li><strong>KLF1 基因相关的圆圈簇</strong>
+<ul>
 <li>表明该簇中的数据点经历了涉及 KLF1 和另一个基因（即 KLF1 + X）的组合扰动。</li>
 </ul>
 </li>
-<li><strong>KLF1 和 CNN1 簇</strong><ul>
+<li><strong>KLF1 和 CNN1 簇</strong>
+<ul>
 <li>验证了相应的预测表达在这些区域中专门高，这与 CRISPRa（CRISPR介导的转录激活）Perturb-seq 实验的预期结果一致。</li>
 </ul>
 </li>
-<li><strong>显性基因簇</strong><ul>
+<li><strong>显性基因簇</strong>
+<ul>
 <li>证明了 scGPT 揭示扰动组合之间关联的能力。</li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
-<h3 id="计算机逆扰动预测"><a href="#计算机逆扰动预测" class="headerlink" title="计算机逆扰动预测"></a>计算机逆扰动预测</h3><ul>
-<li><p><strong>scGPT 的反向扰动预测能力</strong></p>
+<h3 id="计算机逆扰动预测">计算机逆扰动预测</h3>
 <ul>
-<li><p>scGPT 能够预测给定结果细胞状态的遗传扰动来源，其称为计算机反向扰动预测。</p>
+<li><strong>scGPT 的反向扰动预测能力</strong>
+<ul>
+<li>
+<p>scGPT 能够预测给定结果细胞状态的遗传扰动来源，其称为计算机反向扰动预测。</p>
 <ul>
 <li>进行这种反向预测的理想预测模型可用于推断谱系发育的重要驱动基因或促进潜在治疗基因靶标的发现。</li>
 <li>这种能力的一个假设应用示例可能是预测影响细胞从疾病状态中恢复的 CRISPR 靶基因。</li>
 </ul>
 </li>
-<li><p>为了展示反向扰动预测的有效性，使用了 Norman 数据集的一个子集，重点关注涉及 20 个基因的扰动。</p>
+<li>
+<p>为了展示反向扰动预测的有效性，使用了 Norman 数据集的一个子集，重点关注涉及 20 个基因的扰动。</p>
 <ul>
 <li>该组合空间总共由 210 个单基因或两基因扰动组合组成。</li>
 <li>使用 39 个（18%）已知扰动（图中的训练组）对 scGPT 进行微调。</li>
 <li>然后，对未见过的扰动细胞状态的查询测试了模型，scGPT 成功预测了扰动源（在排名最高的预测内），从而生成了观察到的结果。</li>
 </ul>
 </li>
-<li><p>具体示例：</p>
+<li>
+<p>具体示例：</p>
 <ul>
 <li>scGPT 将 CNN1 + MAPK1 基因的正确扰动列为一个测试示例的最佳预测。</li>
 <li>将 FOSB + UBASH3B 基因的正确扰动列为另一个测试示例的第二预测。</li>
 </ul>
 </li>
-<li><p>整体表现：</p>
+<li>
+<p>整体表现：</p>
 <ul>
 <li>scGPT 在前 1 个预测中平均识别出 91.4% 的相关扰动。</li>
 <li>在前 8 个预测中识别出 65.7% 的正确扰动远远优于 GEARS 和差异基因基线。</li>
@@ -920,63 +1012,77 @@ $$</p>
 </ul>
 </li>
 </ul>
-<h2 id="scGPT-支持多批次和多组学集成"><a href="#scGPT-支持多批次和多组学集成" class="headerlink" title="scGPT 支持多批次和多组学集成"></a>scGPT 支持多批次和多组学集成</h2><h3 id="多批次-scRNA-seq-集成"><a href="#多批次-scRNA-seq-集成" class="headerlink" title="多批次 scRNA-seq 集成"></a>多批次 scRNA-seq 集成</h3><ul>
-<li><p><strong>整合多个 scRNA-seq 数据集的挑战</strong></p>
+<h2 id="scGPT-支持多批次和多组学集成">scGPT 支持多批次和多组学集成</h2>
+<h3 id="多批次-scRNA-seq-集成">多批次 scRNA-seq 集成</h3>
+<ul>
+<li>
+<p><strong>整合多个 scRNA-seq 数据集的挑战</strong></p>
 <ul>
 <li>整合来自不同批次的多个 scRNA-seq 数据集在同时保留整合数据的生物方差和消除技术批次效应方面提出了独特的挑战。</li>
 <li>为了整合测序样本，通过学习恢复隐藏基因表达的统一细胞呈现方式，以自我监督的方式微调 scGPT。</li>
 </ul>
 </li>
-<li><p><strong>与其他集成方法的比较</strong></p>
+<li>
+<p><strong>与其他集成方法的比较</strong></p>
 <ul>
 <li>在的基准测试实验中，将 scGPT 与三种流行的集成方法进行了比较：scVI38、Seurat39 和 Harmony40。</li>
 <li>评估在三个集成数据集上进行，即 COVID-19（18 批）12、外周血单核细胞（PBMC）10k（两批）41 和鼻周皮质（两批）42 数据集。</li>
 </ul>
 </li>
-<li><p><strong>PBMC 10k 数据集的性能</strong></p>
+<li>
+<p><strong>PBMC 10k 数据集的性能</strong></p>
 <ul>
 <li>在 PBMC 10k 数据集中，scGPT 成功分离了所有细胞类型。</li>
 <li>scGPT 的整合性能得到了其高生物保护评分的进一步支持，AvgBIO 评分为 0.821，比对比方法高 5-10%。</li>
 </ul>
 </li>
-<li><p><strong>AvgBIO 分数</strong></p>
+<li>
+<p><strong>AvgBIO 分数</strong></p>
 <ul>
 <li>AvgBIO 分数汇总了三种细胞类型聚类指标，即标准化互信息 (NMIcell)、调整兰德指数 (ARIcell) 和平均轮廓宽度 (ASWcell)</li>
 <li>scGPT 还表现出了相当大的性能，用于集成即使没有微调的 PBMC 10k 数据集，突出了预训练的普遍性。</li>
 </ul>
 </li>
-<li><p><strong>鼻周皮层数据集的性能</strong></p>
+<li>
+<p><strong>鼻周皮层数据集的性能</strong></p>
 <ul>
 <li>在鼻周皮层数据集的背景下，scGPT 相对于所有其他方法仍然具有竞争力。</li>
 <li>这一发现凸显了从全人类数据集中学到的特征应用于特定器官或组织（例如大脑）时的可转移性和鲁棒性。</li>
 </ul>
 </li>
-<li><p><strong>其他指标表现</strong></p>
+<li>
+<p><strong>其他指标表现</strong></p>
 <ul>
 <li>scGPT 在所有集成指标上始终取得有竞争力的分数，并表现出对生物信号的强大保护。</li>
 <li>还制定了加速集成任务微调过程的策略，包括冻结特定模型层并排除不表达的基因，同时保持与原始方法相当的结果。</li>
 </ul>
 </li>
 </ul>
-<h3 id="单细胞多组学整合"><a href="#单细胞多组学整合" class="headerlink" title="单细胞多组学整合"></a>单细胞多组学整合</h3><ul>
-<li><p><strong>scMultiomic 数据集整合</strong></p>
+<h3 id="单细胞多组学整合">单细胞多组学整合</h3>
+<ul>
+<li>
+<p><strong>scMultiomic 数据集整合</strong></p>
 <ul>
 <li>单细胞多组学 (scMultiomic) 数据结合了遗传调控的多种观点，例如表观遗传、转录组和翻译活动，在保留生物信号的同时聚合细胞表征提出了独特的挑战。</li>
 <li>scGPT 通过有效地提取不同组学数据集中的集成细胞嵌入来解决这一挑战。</li>
 </ul>
 </li>
-<li><p><strong>与其他方法的比较</strong></p>
+<li>
+<p><strong>与其他方法的比较</strong></p>
 <ul>
-<li>在 10x 多组 PBMC 数据集43 中，将 scGPT 与两种最先进的方法 scGLUE13 和 Seurat (v.4)44 进行比较。<ul>
+<li>在 10x 多组 PBMC 数据集43 中，将 scGPT 与两种最先进的方法 scGLUE13 和 Seurat (v.4)44 进行比较。
+<ul>
 <li>scGPT 是唯一能够成功生成 CD8+ 初始细胞的独特簇的方法。</li>
 </ul>
 </li>
-<li>在骨髓单核细胞 (BMMC)45 的配对基因表达和蛋白质丰度数据集上测试了 scGPT。<ul>
+<li>在骨髓单核细胞 (BMMC)45 的配对基因表达和蛋白质丰度数据集上测试了 scGPT。
+<ul>
 <li>scGPT 呈现出比 Seurat (v.4) 更明确的簇结构，AvgBIO 分数提高了 9%。</li>
 <li>scGPT 能够将 CD4+ 初始 T 细胞和 CD4+ 激活 T 细胞分离为两个不同的簇，进一步证实了该模型捕获免疫细胞亚群之间细微差异的能力。</li>
 </ul>
 </li>
-<li>在马赛克数据集成设置中，使用 ATAC 和选择抗原分析 (ASAP) 人类 PBMC 数据集46 作为示例。<ul>
+<li>在马赛克数据集成设置中，使用 ATAC 和选择抗原分析 (ASAP) 人类 PBMC 数据集46 作为示例。
+<ul>
 <li>scGPT 表现出卓越的批量校正性能，特别是在 B、骨髓和自然杀伤 (NK) 细胞组中。</li>
 </ul>
 </li>
@@ -984,20 +1090,26 @@ $$</p>
 </ul>
 </li>
 </ul>
-<h2 id="scGPT-揭示特定细胞状态的基因网络"><a href="#scGPT-揭示特定细胞状态的基因网络" class="headerlink" title="scGPT 揭示特定细胞状态的基因网络"></a>scGPT 揭示特定细胞状态的基因网络</h2><p>GRN 背后的转录因子、辅因子、增强子和靶基因之间的相互作用介导重要的生物过程。现有的 GRN 推断方法通常依赖于静态基因表达的相关性或伪时间估计作为因果图的代理。 scGPT 通过基因表达的生成模型进行优化，在其基因嵌入以及注意力图中隐式编码了这种关系。因此，通过探测预训练或微调模型的 scGPT 嵌入和注意力图来提出 GRN 推理工作流程。<br>基因嵌入构建了一个相似性网络，该网络需要在数据集级别上进行基因间相互作用。注意力图进一步捕捉不同细胞状态下独特的基因网络激活模式。</p>
+<h2 id="scGPT-揭示特定细胞状态的基因网络">scGPT 揭示特定细胞状态的基因网络</h2>
+<p>GRN 背后的转录因子、辅因子、增强子和靶基因之间的相互作用介导重要的生物过程。现有的 GRN 推断方法通常依赖于静态基因表达的相关性或伪时间估计作为因果图的代理。 scGPT 通过基因表达的生成模型进行优化，在其基因嵌入以及注意力图中隐式编码了这种关系。因此，通过探测预训练或微调模型的 scGPT 嵌入和注意力图来提出 GRN 推理工作流程。<br>
+基因嵌入构建了一个相似性网络，该网络需要在数据集级别上进行基因间相互作用。注意力图进一步捕捉不同细胞状态下独特的基因网络激活模式。</p>
 <ul>
-<li><p><strong>基因标记嵌入的分组和区分</strong></p>
+<li>
+<p><strong>基因标记嵌入的分组和区分</strong></p>
 <ul>
 <li>scGPT 展示了其通过学习基因标记嵌入对功能相关基因进行分组并区分功能不同基因的能力。</li>
-<li>在图 5a 中，使用预训练的 scGPT 模型中的基因嵌入来可视化人类白细胞抗原 (HLA) 蛋白的相似性网络，从而进行了健全性检查。<ul>
+<li>在图 5a 中，使用预训练的 scGPT 模型中的基因嵌入来可视化人类白细胞抗原 (HLA) 蛋白的相似性网络，从而进行了健全性检查。
+<ul>
 <li>在这种零样本设置中，scGPT 模型成功突出显示了与明确表征的 HLA 类别相对应的两个簇：HLA I 类和 HLA II 类基因。</li>
 </ul>
 </li>
 </ul>
 </li>
-<li><p><strong>HLA 类别的功能</strong></p>
+<li>
+<p><strong>HLA 类别的功能</strong></p>
 <ul>
-<li>这些类别编码在免疫环境中发挥不同作用的抗原呈递蛋白。<ul>
+<li>这些类别编码在免疫环境中发挥不同作用的抗原呈递蛋白。
+<ul>
 <li>HLA I 类蛋白（由 HLA-A、HLA-C 和 HLA-E 等基因编码）可被 CD8+ T 细胞识别并介导细胞毒性作用。</li>
 <li>HLA II 类蛋白（由 HLA-DRB1、 HLA-DRA 和 HLA-DPA1）被 CD4+ T 细胞识别并触发更广泛的辅助功能。</li>
 </ul>
@@ -1005,10 +1117,12 @@ $$</p>
 <li>在“免疫人类”数据集上微调了 scGPT 模型，并探索了该数据集中存在的免疫细胞类型特有的 CD 基因网络。</li>
 </ul>
 </li>
-<li><p><strong>GRN 分析</strong></p>
+<li>
+<p><strong>GRN 分析</strong></p>
 <ul>
 <li>为了进行 GRN 分析，使用了与集成任务相同的微调策略。</li>
-<li>预训练的 scGPT 模型成功识别了编码用于 T 细胞激活的 T3 复合物的基因组（CD3E、CD3D 和 CD3G）、用于 B 细胞信号传导的 CD79A 和 CD79B 以及作为 HLA I 类分子共受体的 CD8A 和 CD8B 49。<ul>
+<li>预训练的 scGPT 模型成功识别了编码用于 T 细胞激活的 T3 复合物的基因组（CD3E、CD3D 和 CD3G）、用于 B 细胞信号传导的 CD79A 和 CD79B 以及作为 HLA I 类分子共受体的 CD8A 和 CD8B 49。
+<ul>
 <li>此外，微调的 scGPT 模型强调了 CD36 和 CD14 之间的联系。</li>
 </ul>
 </li>
@@ -1018,13 +1132,17 @@ $$</p>
 <blockquote>
 <p>GRN 指的是基因调控网络（Gene Regulatory Network），它是一种描述基因之间相互作用的网络结构。在生物学中，基因调控网络描述了基因与转录因子、miRNA 和其他基因调控元件之间的相互作用关系，以及这些相互作用如何影响基因的表达。基因调控网络对于理解基因调控的复杂性和细胞功能的调控机制非常重要，因为它们可以揭示基因调控网络中的关键因素和通路，并帮助研究人员理解生物体内的信号传导和细胞命运决定过程。</p>
 </blockquote>
-<h2 id="小节-1"><a href="#小节-1" class="headerlink" title="小节"></a>小节</h2><p><code>scGPT</code>和<code>GenePT</code>在下游任务和指标上有一定的重合。相比于<code>GenePT</code>，<code>scGPT</code>的任务要更复杂一些，好多也是第一次见，下面就分析一下。<br>基因扰动分析和计算机逆扰动预测是在基因组学和生物信息学领域中常见的任务，它们通常用于理解基因在细胞状态和生物学过程中的功能和影响。下面是它们的一般流程和一些评价指标：</p>
-<h3 id="基因扰动分析："><a href="#基因扰动分析：" class="headerlink" title="基因扰动分析："></a>基因扰动分析：</h3><ol>
+<h2 id="小节-2">小节</h2>
+<p><code>scGPT</code>和<code>GenePT</code>在下游任务和指标上有一定的重合。相比于<code>GenePT</code>，<code>scGPT</code>的任务要更复杂一些，好多也是第一次见，下面就分析一下。<br>
+基因扰动分析和计算机逆扰动预测是在基因组学和生物信息学领域中常见的任务，它们通常用于理解基因在细胞状态和生物学过程中的功能和影响。下面是它们的一般流程和一些评价指标：</p>
+<h3 id="基因扰动分析：">基因扰动分析：</h3>
+<ol>
 <li><strong>扰动数据收集：</strong> 收集包含基因扰动实验数据的数据集，例如基因编辑技术（如CRISPR）引发的基因敲除、过表达或突变。</li>
 <li><strong>数据预处理：</strong> 对扰动实验数据进行预处理，包括数据清洗、去除噪声和异常值等。</li>
 <li><strong>特征提取：</strong> 从基因扰动数据中提取特征，这可以包括基因表达水平的变化、蛋白质互作网络的改变等。</li>
 <li><strong>分析和解释：</strong> 使用统计学和机器学习技术分析和解释基因扰动对生物过程的影响，可能会识别关键的调节基因、通路或生物学过程。</li>
-<li><strong>评价指标：</strong> 常用的评价指标包括：<ul>
+<li><strong>评价指标：</strong> 常用的评价指标包括：
+<ul>
 <li><strong>差异表达基因（DEGs）数量：</strong> 受扰动后基因表达水平显著变化的基因数量。</li>
 <li><strong>富集分析：</strong> 基因扰动是否导致某些功能通路的显著富集。</li>
 <li><strong>网络拓扑分析：</strong> 基因扰动是否影响了基因调控网络的结构和稳定性。</li>
@@ -1032,13 +1150,15 @@ $$</p>
 </ul>
 </li>
 </ol>
-<h3 id="计算机逆扰动预测："><a href="#计算机逆扰动预测：" class="headerlink" title="计算机逆扰动预测："></a>计算机逆扰动预测：</h3><ol>
+<h3 id="计算机逆扰动预测：">计算机逆扰动预测：</h3>
+<ol>
 <li><strong>建模：</strong> 使用机器学习或深度学习方法构建模型，该模型可以从基因表达数据中预测出导致这些表达模式的基因扰动。</li>
 <li><strong>数据准备：</strong> 准备包含基因表达数据和相应基因扰动信息的训练集和测试集。</li>
 <li><strong>特征工程：</strong> 对基因表达数据进行特征工程，可能包括降维、标准化或提取特征。</li>
 <li><strong>模型训练：</strong> 使用训练集训练逆扰动预测模型，调整模型参数以提高预测性能。</li>
 <li><strong>模型评估：</strong> 使用测试集评估模型的性能，通常使用常见的回归或分类指标进行评估。</li>
-<li><strong>评价指标：</strong> 常见的评价指标包括：<ul>
+<li><strong>评价指标：</strong> 常见的评价指标包括：
+<ul>
 <li><strong>均方误差（MSE）：</strong> 预测值与真实值之间的平均平方差。</li>
 <li><strong>相关系数（Correlation Coefficient）：</strong> 预测值和真实值之间的线性相关性。</li>
 <li><strong>准确率、召回率、F1 分数：</strong> 对于分类任务，评估模型对基因扰动的分类准确性。</li>
@@ -1046,9 +1166,10 @@ $$</p>
 </li>
 </ol>
 <p>综合来看，基因扰动分析和计算机逆扰动预测是通过对基因表达数据进行分析和建模来理解基因功能和影响的重要工具，评价指标可以帮助评估模型的性能和预测能力。</p>
-<h1 id="geneformer"><a href="#geneformer" class="headerlink" title="geneformer"></a>geneformer</h1>]]></content>
+<h1>geneformer</h1>
+]]></content>
       <categories>
-        <category>大模型</category>
+        <category>深度学习</category>
         <category>生命科学</category>
       </categories>
       <tags>
@@ -1466,7 +1587,7 @@ $$</p>
 | coexpression network   | 基因调控网络推断的基准方法 | 未明确提及，但通过与已知生物学和功能组的一致性来验证 | <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-04179-4">coexpression network</a> |</p>
 ]]></content>
       <categories>
-        <category>大模型</category>
+        <category>深度学习</category>
         <category>生命科学</category>
       </categories>
       <tags>
@@ -1650,7 +1771,7 @@ GenePT在多数任务中展现出与现有模型相当的或更好的性能。</
 </table>
 ]]></content>
       <categories>
-        <category>大模型</category>
+        <category>深度学习</category>
         <category>生命科学</category>
       </categories>
       <tags>
@@ -1785,7 +1906,7 @@ GenePT在多数任务中展现出与现有模型相当的或更好的性能。</
 <p>通过以上步骤，你应该能够在Linux系统中成功安装并使用<code>aria2c</code>、<code>wget</code>和<code>git-lfs</code>。</p>
 ]]></content>
       <categories>
-        <category>机器学习</category>
+        <category>深度学习</category>
         <category>工具</category>
       </categories>
       <tags>
@@ -2053,6 +2174,107 @@ $ \frac{\partial L}{\partial b^{(1)}} = \frac{\partial L}{\partial z^{(2)}} \cdo
       <tags>
         <tag>Machine Learning</tag>
         <tag>Deep Learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>在autodl上建立新的虚拟机实例</title>
+    <url>/blog/2024/07/02/%E5%9C%A8autodl%E4%B8%8A%E5%BB%BA%E7%AB%8B%E6%96%B0%E7%9A%84%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AE%9E%E4%BE%8B/</url>
+    <content><![CDATA[<h1>创建虚拟机</h1>
+<p>对于第一次使用autodl的用户，进入<a href="https://www.autodl.com/">autodl官网</a>后；首先要进行账号的注册，如果是学生的话要记得做<strong>学生认证</strong>，这可以省一点钱。这些操作比较简单，这里不多介绍。</p>
+<h2 id="创建实例">创建实例</h2>
+<p>注册完成后，点击右上角的<strong>控制台</strong>按钮，进入控制台的界面。如图：</p>
+<p><img src="%E6%8E%A7%E5%88%B6%E5%8F%B0.png" alt="创立实例"></p>
+<p>随后，进入实例容器中，如图：</p>
+<p><img src="%E6%8E%A7%E5%88%B6%E5%8F%B0%E5%86%85.png" alt="进入实例容器"></p>
+<p>这里，展示了我们租用的所有实例，如图：</p>
+<p><img src="%E5%AE%9E%E4%BE%8B.png" alt="实例容器"></p>
+<p>点击<strong>租用新实例</strong>，进入实例创建的界面，如图：</p>
+<p><img src="%E5%88%9B%E5%BB%BA%E6%96%B0%E5%AE%9E%E4%BE%8B.png" alt="创建实例"></p>
+<p>可以看到，这里可以选择合适的计费方式、地区、GPU类型、GPU 数量、数据盘大小、使用的镜像等。</p>
+<p>这里，我们选择<strong>按量计费</strong>，<strong>重庆A区</strong>，<strong>4090D*1</strong>，<strong>500GB数据盘</strong>，已经<strong>如图镜像</strong>：</p>
+<p><img src="%E9%95%9C%E5%83%8F.png" alt="镜像"></p>
+<p>随后，点击<strong>创建实例</strong>，等待一段时间后，实例就创建成功了。</p>
+<p><img src="%E5%88%9B%E5%BB%BA%E6%96%B0%E5%AE%9E%E4%BE%8B%E6%88%90%E5%8A%9F.png" alt="创建实例成功"></p>
+<h1>连接虚拟机</h1>
+<p>虽然autodl给出了几种不同的连接方式，但是这里我推荐使用<strong>SSH</strong>连接方式。并且是依赖<strong>密钥</strong>。</p>
+<h2 id="设置config">设置<code>config</code></h2>
+<p>这里，我们首先复制<strong>登录指令</strong>，你会得到一个类似于<code>ssh -p 12345 root@xxx.mmm.nnn.com</code>形式的指令。然后，进入用户下的<code>.ssh</code>文件夹；如图</p>
+<p><img src="%E7%94%A8%E6%88%B7.png" alt="用户"></p>
+<p>进入<code>config</code>文件中，按照下面的格式写入：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host autodl</span><br><span class="line">  HostName xxx.mmm.nnn.com</span><br><span class="line">  Port 12345</span><br><span class="line">  User root</span><br><span class="line">  IdentityFile ~/.ssh/autodl</span><br></pre></td></tr></table></figure>
+<h2 id="设置密钥-公钥对">设置密钥-公钥对</h2>
+<p>进入<code>Terminal</code>，在windows上就是<code>windows powershell</code>，输入<code>cd ~/.ssh</code>进入了<code>.ssh</code>文件夹中。</p>
+<p>然后输入<code>ssh-keygen -t rsa -C [user_name]</code>，这里的<code>user_name</code>就是你的gcp的用户名，也就是从web登录后的<code>xxx@mmm</code>中的<code>xxx</code>；也就是<code>root</code>随后会要求你输入一个保存的文件名，不妨设置为<code>autodl</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t rsa -C root</span><br></pre></td></tr></table></figure>
+<p>随后，会要求你输入一个密码，这里可以不设置，直接回车。然后，进入<code>.ssh</code>中的<code>autodl.pub</code>文件中，复制其中的内容。</p>
+<p>然后，在<strong>容器实例</strong>中，进入<strong>设置密钥登录</strong>，如图：</p>
+<p><img src="%E8%AE%BE%E7%BD%AE%E5%AF%86%E9%92%A5%E7%99%BB%E5%BD%95.png" alt="设置密钥登录"></p>
+<p>随后，点击<strong>添加SSH公钥</strong>，将复制的公钥粘贴进去，点击<strong>确定</strong>，重启我们正在运行的实例，等待一段时间后，密钥就添加成功了。</p>
+<h2 id="连接虚拟机">连接虚拟机</h2>
+<p>进入<code>Terminal</code>，输入<code>ssh autodl</code>就可以进入我们的虚拟机了。</p>
+<h1>环境</h1>
+<h2 id="CUDA">CUDA</h2>
+<p>我一般会选择自带<code>pytorch</code>的镜像，这样就不用自己按照<code>CUDA</code>和<code>CUDNN</code>了。但是，如果真的遇到需要自己按照，也是很简单的。</p>
+<h3 id="1-安装内核头文件">1. 安装内核头文件</h3>
+<p>按照以下步骤操作：</p>
+<ol>
+<li>
+<p><strong>更新包列表</strong>：</p>
+ <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p><strong>安装内核头文件</strong>：</p>
+ <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">sudo apt-get install linux-headers-$(<span class="built_in">uname</span> -r)</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p><strong>重新运行NVIDIA驱动程序安装脚本</strong>：</p>
+ <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">sudo /opt/deeplearning/install-driver.sh</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="2-验证安装">2. 验证安装</h3>
+<ol>
+<li><strong>检查NVIDIA驱动程序是否正确安装</strong>： <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">nvidia-smi</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="示例步骤">示例步骤</h3>
+<p>请按照以下完整步骤操作：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 更新包列表</span></span><br><span class="line">sudo apt-get update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装内核头文件</span></span><br><span class="line">sudo apt-get install linux-headers-$(<span class="built_in">uname</span> -r)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新运行NVIDIA驱动程序安装脚本</span></span><br><span class="line">sudo /opt/deeplearning/install-driver.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查NVIDIA驱动程序是否正确安装</span></span><br><span class="line">nvidia-smi</span><br></pre></td></tr></table></figure>
+<h3 id="可能的其他情况">可能的其他情况</h3>
+<p>如果在运行上述步骤时仍然遇到问题，可以检查以下情况：</p>
+<ol>
+<li>
+<p><strong>确认内核版本</strong>：<br>
+确认当前运行的内核版本：</p>
+ <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="built_in">uname</span> -r</span><br></pre></td></tr></table></figure>
+<p>确保你安装的内核头文件版本与该版本匹配。</p>
+</li>
+<li>
+<p><strong>手动指定内核源目录</strong>：<br>
+如果系统中有多个内核版本，可能需要手动指定内核源目录：</p>
+ <figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">sudo /opt/deeplearning/install-driver.sh --kernelsourcedir /usr/src/linux-headers-$(<span class="built_in">uname</span> -r)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="示例输出">示例输出</h3>
+<p>成功运行这些步骤后，你应该看到 <code>nvidia-smi</code> 命令的输出，显示安装的NVIDIA驱动程序和GPU信息：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">Fri Jun 28 02:05:51 2024</span><br><span class="line">+-----------------------------------------------------------------------------+</span><br><span class="line">| NVIDIA-SMI 450.51.06    Driver Version: 450.51.06    CUDA Version: 12.0     |</span><br><span class="line">|-------------------------------+----------------------+----------------------+</span><br><span class="line">| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |</span><br><span class="line">| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |</span><br><span class="line">|===============================+======================+======================|</span><br><span class="line">|   0  Tesla V100-SXM2...  Off  | 00000000:00:04.0 Off |                  N/A |</span><br><span class="line">| N/A   30C    P0    25W / 300W |      0MiB / 16160MiB |      0%      Default |</span><br><span class="line">+-------------------------------+----------------------+----------------------+</span><br><span class="line"></span><br><span class="line">+-----------------------------------------------------------------------------+</span><br><span class="line">| Processes:                                                                  |</span><br><span class="line">|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |</span><br><span class="line">|        ID   ID                                                   Usage      |</span><br><span class="line">|=============================================================================|</span><br><span class="line">|  No running processes found                                                 |</span><br><span class="line">+-----------------------------------------------------------------------------+</span><br></pre></td></tr></table></figure>
+<h2 id="pytorch">pytorch</h2>
+<p>一般来说，<code>pytorch</code>在原有的镜像中就已经正确的安装了，但是我们往往要在<code>base</code>之外建立自己的虚拟环境，比如<code>vision</code>，这时候，我们就需要安装自己的<code>torch</code>了，这同样十分简单。</p>
+<p>首先进入<a href="https://pytorch.org/">pytorch</a>，在如图位置选择适合自己的<code>torch</code>类型，值得注意的是<strong>Compute Platform</strong>是向下兼容的。</p>
+<p>也就是说，如果使用的机器是<code>CUDA Version: 12.0 </code>那么就应该选择<code>CUDA 11.8</code>！</p>
+<blockquote>
+<p>到此为止，绝大多数通用的环境配置就搞完了，剩下的package就自己下载吧~~</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>深度学习</category>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>Git</tag>
+        <tag>Deep Learning</tag>
+        <tag>Virtual Machine</tag>
+        <tag>ssh</tag>
+        <tag>GitHub</tag>
       </tags>
   </entry>
 </search>
