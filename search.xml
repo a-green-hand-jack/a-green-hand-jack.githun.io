@@ -2219,28 +2219,37 @@ $ \frac{\partial L}{\partial b^{(1)}} = \frac{\partial L}{\partial z^{(2)}} \cdo
   <entry>
     <title>极端条件下的GitHub连接</title>
     <url>/blog/2024/10/17/%E6%9E%81%E7%AB%AF%E6%9D%A1%E4%BB%B6%E4%B8%8B%E7%9A%84GitHub%E8%BF%9E%E6%8E%A5/</url>
-    <content><![CDATA[<h1 id="HPC环境下的Git和GitHub设置指南"><a href="#HPC环境下的Git和GitHub设置指南" class="headerlink" title="HPC环境下的Git和GitHub设置指南"></a>HPC环境下的Git和GitHub设置指南</h1><p>有时候，对于高校的研究生，他们需要或者不得不使用学校的服务器。在这种条件下，对学生而言，往往是一个人有一个独立账号；但是也有一些例外情况，比如某一位精明能干的博士生手下有好多本科生。这样一来，情况就不一样了，因为本科生，特别是做交流的本科生，往往是没有服务器账号的。如此一来，他们就只能好几个人使用一个服务器账号了。绝大多数条件下，这是没有问题的，但是如果希望使用 git 和 GitHub 来管理和提交自己的代码，这要怎么办？也就是说，在一个设备的一个账号下，多个研究人员要怎么合理的使用自己的git和GitHub？</p>
-<p>可惜的是，这样的问题或许太过小众，这样的工况太过极端；以至于鲜有人仔细考虑。有些时候，为了省事同学们甚至是直接使用ssh在本地机器和学校服务器之间传递代码。为了解决这个问题，在博主掉了 114514 根头发之前，写好了这个帖子，以飨读者。</p>
-<h2 id="创建个人工作目录"><a href="#创建个人工作目录" class="headerlink" title="创建个人工作目录"></a>创建个人工作目录</h2><blockquote>
-<p>这里假设同学们以及成功登录了服务器</p>
+    <content><![CDATA[<p>有时候，对于高校的研究生，他们需要或者不得不使用学校的服务器。在这种条件下，对学生而言，往往是一个人有一个独立账号；但是也有一些例外情况，比如某一位精明能干的博士生手下有好多本科生。这样一来，情况就不一样了，因为本科生，特别是做交流的本科生，往往是没有服务器账号的。如此一来，他们就只能好几个人使用一个服务器账号了。绝大多数条件下，这是没有问题的，但是如果希望使用 git 和 GitHub 来管理和提交自己的代码，这要怎么办？也就是说，在一个设备的一个账号下，多个研究人员要怎么合理的使用自己的git和GitHub？🎈</p>
+<p>可惜的是，这样的问题或许太过小众，这样的工况太过极端；以至于鲜有人仔细考虑。有些时候，为了省事同学们甚至是直接使用ssh在本地机器和学校服务器之间传递代码。为了解决这个问题，在博主掉了 114514 根头发之前＞﹏＜，写好了这个帖子，以飨读者。</p>
+<h1>创建个人工作目录</h1>
+<blockquote>
+<p>这里假设同学们已经成功登录了服务器</p>
 </blockquote>
 <p>首先在共享账户下创建您的个人工作目录，这里的共享账号往往就是用户文件夹，但是有时候是指定好的一个文件夹，这个根据不同学校和实验室的要求各有不同。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> ./myname_workspace</span><br><span class="line"><span class="built_in">cd</span> ./myname_workspace</span><br></pre></td></tr></table></figure>
 <p>将<code>myname</code>替换为您的标识符，比如我就可以使用<code>jack</code>作为自己的标识符。</p>
-<h2 id="配置Git"><a href="#配置Git" class="headerlink" title="配置Git"></a>配置Git</h2><p>在您的工作目录下创建Git配置文件：</p>
+<h1>配置Git</h1>
+<p>在您的工作目录下创建Git配置文件：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 注意，这时候应该在 myname_workspace 中</span></span><br><span class="line"><span class="built_in">touch</span> .gitconfig_myname</span><br></pre></td></tr></table></figure>
 <p>编辑此文件，添加您的Git配置：</p>
 <figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[user]</span></span><br><span class="line">    <span class="attr">name</span> = Your GitHub Name</span><br><span class="line">    <span class="attr">email</span> = your.GitHub@mail.com</span><br></pre></td></tr></table></figure>
-<h2 id="设置SSH密钥"><a href="#设置SSH密钥" class="headerlink" title="设置SSH密钥"></a>设置SSH密钥</h2><h3 id="生成SSH密钥对"><a href="#生成SSH密钥对" class="headerlink" title="生成SSH密钥对"></a>生成SSH密钥对</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 注意，这时候应该在 myname_workspace 中</span></span><br><span class="line"><span class="built_in">mkdir</span> .ssh_myname</span><br><span class="line">ssh-keygen -t rsa -C <span class="string">&quot;your.GitHub@mail.com&quot;</span> -f .ssh_myname/id_rsa_myname</span><br></pre></td></tr></table></figure>
-<h3 id="配置SSH"><a href="#配置SSH" class="headerlink" title="配置SSH"></a>配置SSH</h3><p>创建或编辑<code>.ssh_myname/config</code>文件：</p>
+<h1>设置SSH密钥</h1>
+<h2 id="生成SSH密钥对">生成SSH密钥对</h2>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 注意，这时候应该在 myname_workspace 中</span></span><br><span class="line"><span class="built_in">mkdir</span> .ssh_myname</span><br><span class="line">ssh-keygen -t rsa -C <span class="string">&quot;your.GitHub@mail.com&quot;</span> -f .ssh_myname/id_rsa_myname</span><br></pre></td></tr></table></figure>
+<h2 id="配置SSH">配置SSH</h2>
+<p>创建或编辑<code>.ssh_myname/config</code>文件：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com-myname</span><br><span class="line">    HostName github.com</span><br><span class="line">    User git</span><br><span class="line">    IdentityFile .ssh_myname/id_rsa_myname</span><br></pre></td></tr></table></figure>
-<h3 id="添加公钥到GitHub"><a href="#添加公钥到GitHub" class="headerlink" title="添加公钥到GitHub"></a>添加公钥到GitHub</h3><p>查看并复制公钥内容：</p>
+<h2 id="添加公钥到GitHub">添加公钥到GitHub</h2>
+<p>查看并复制公钥内容：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 注意，这时候应该在 myname_workspace 中</span></span><br><span class="line"><span class="built_in">cat</span> .ssh_myname/id_rsa_myname.pub</span><br></pre></td></tr></table></figure>
 <p>将公钥添加到您的<a href="https://github.com/settings/keys">GitHub账户设置</a>中。</p>
-<h2 id="更新代理"><a href="#更新代理" class="headerlink" title="更新代理"></a>更新代理</h2><p>添加SSH密钥到SSH代理：</p>
+<h1>更新代理</h1>
+<p>添加SSH密钥到SSH代理：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">eval</span> $(ssh-agent -s)  <span class="comment"># 确认代理在正常的工作</span></span><br><span class="line">ssh-add .ssh_myname/id_rsa_myname <span class="comment"># 临时添加自己的密钥</span></span><br></pre></td></tr></table></figure>
-<h2 id="正常操作"><a href="#正常操作" class="headerlink" title="正常操作"></a>正常操作</h2><p>在更新代理结束后，一般来说就可以正常的工作了，此时 git 的操作也和平时没有区别了。可以 clone 一个私人文件测试是不是成功。如果发生意外，可以再次更新代理后尝试。</p>
-<h2 id="提示"><a href="#提示" class="headerlink" title="提示"></a>提示</h2><p>请注意，这里的文件的路径问题，都是在自己的工作目录下进行操作。</p>
+<h1>开始工作</h1>
+<p>在更新代理结束后，一般来说就可以正常的工作了，此时 git 的操作也和平时没有区别了🎉。可以 clone 一个私人文件测试是不是成功。如果发生意外，可以再次更新代理后尝试。</p>
+<h1>提示</h1>
+<p>请注意这里的文件的路径，都是在自己的工作目录下进行操作，不要不小心跑到了共享账户，一般就是 <code>home</code>，里面了🤣。</p>
 ]]></content>
       <categories>
         <category>雕虫小技</category>
