@@ -6,10 +6,35 @@
   <link href="https://a-green-hand-jack.github.io/blog/atom.xml" rel="self"/>
   
   <link href="https://a-green-hand-jack.github.io/blog/"/>
-  <updated>2024-07-03T04:58:25.162Z</updated>
+  <updated>2024-10-17T11:49:20.779Z</updated>
   <id>https://a-green-hand-jack.github.io/blog/</id>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>极端条件下的GitHub连接</title>
+    <link href="https://a-green-hand-jack.github.io/blog/2024/10/17/%E6%9E%81%E7%AB%AF%E6%9D%A1%E4%BB%B6%E4%B8%8B%E7%9A%84GitHub%E8%BF%9E%E6%8E%A5/"/>
+    <id>https://a-green-hand-jack.github.io/blog/2024/10/17/%E6%9E%81%E7%AB%AF%E6%9D%A1%E4%BB%B6%E4%B8%8B%E7%9A%84GitHub%E8%BF%9E%E6%8E%A5/</id>
+    <published>2024-10-17T11:26:55.000Z</published>
+    <updated>2024-10-17T11:49:20.779Z</updated>
+    
+    
+    <summary type="html">本指南适用于多人共享HPC账户的情况，帮助您在不影响他人的前提下设置个人的Git环境和GitHub连接。</summary>
+    
+    
+    
+    <category term="雕虫小技" scheme="https://a-green-hand-jack.github.io/blog/categories/%E9%9B%95%E8%99%AB%E5%B0%8F%E6%8A%80/"/>
+    
+    <category term="Git" scheme="https://a-green-hand-jack.github.io/blog/categories/%E9%9B%95%E8%99%AB%E5%B0%8F%E6%8A%80/Git/"/>
+    
+    
+    <category term="Git" scheme="https://a-green-hand-jack.github.io/blog/tags/Git/"/>
+    
+    <category term="Github" scheme="https://a-green-hand-jack.github.io/blog/tags/Github/"/>
+    
+    <category term="SSH" scheme="https://a-green-hand-jack.github.io/blog/tags/SSH/"/>
+    
+  </entry>
   
   <entry>
     <title>在autodl上建立新的虚拟机实例</title>
